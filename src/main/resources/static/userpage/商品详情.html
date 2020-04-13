@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>商品详情</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="css/shopping-mall-index.css"/>
+    <link rel="stylesheet" type="text/css" href="css/detail.css"/>
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+
+<body style="position:relative;">
+<!--top 开始-->
+<div class="top" style="height: 224.4px"></div>
+<div class="nav"></div>
+
+<!--内容开始-->
+<div class="details w1200">
+    <div class="deta-info1">
+        <div class="dt-if1-l f-l">
+            <div class="dt-if1-datu">
+                <ul qie-da="">
+                    <li><a href="javascript:void(0)" id="mainImg">
+                        <!--<img src="petimg/dog/9345d688d43f879410276ff6d81b0ef41ad53a09.jpg" />-->
+                    </a></li>
+                    <div style="clear:both;"></div>
+                </ul>
+            </div>
+            <div class="dt-if1-fx" id="itemCode">
+                <!--<span>商品编码:128618586</span>-->
+            </div>
+        </div>
+
+        <div class="dt-if1-m f-l">
+            <div class="dt-ifm-hd">
+                <h3 id="title">
+                    <!--<a href="javascript:void(0)">韩国进口膨化零食品 九日牌蜂蜜黄油薯片60g 蜂蜜黄油味</a>-->
+                </h3>
+                <p id="desc"></p>
+            </div>
+            <div style="font-size: 15px;margin-left: 10px">
+                <span>浏览次数:</span><span id="browse"></span>
+            </div>
+            <div class="dt-ifm-gojia">
+
+                <dl>
+                    <div style="margin-top: 10px;margin-left: 0px">
+                        <dt>市场价</dt>
+                        <dd>
+                            <p class="p1">
+                                <span class="sp2" id="primaryPrice"></span>
+                            </p>
+                        </dd>
+                    </div>
+                </dl>
+                <dl>
+                    <div style="margin-top: 40px;margin-left: 0px">
+                        <dt>爱宠价</dt>
+                        <dd>
+                            <p class="p1">
+                                <span class="sp1" id="price" style="color: red;font-size: 34px"></span>
+                            </p>
+                        </dd>
+                        <div style="clear:both;"></div>
+                    </div>
+                </dl>
+
+            </div>
+            <div style="font-size: 30px;left: 50px;margin-top: 20px;margin-left: 50px">
+                <span>已售：</span><span id="sales"></span>
+                <span style="margin-left: 50px"> 还剩库存：</span><span id="stock" style="color: #5cb85c"></span>
+            </div>
+            <dl class="dt-ifm-box3" style="margin-top: 30px">
+                <dt>数量</dt>
+                <dd>
+                    <a id="box3-left" href="JavaScript:;">-</a>
+                    <input id="amount" type="text" value="1">
+                    <a id="box3-right" href="JavaScript:;">+</a>
+                </dd>
+                <div style="clear:both;"></div>
+            </dl>
+            <div class="dt-ifm-box8">
+                <a href="javascript:void(0)" title="正规授权，所有商品可100%追溯来源。"><img
+                        src="images/shopping/common/qualityassurance.png" style="vertical-align:middle"/>正品保证</a>
+                <a href="javascript:void(0)"
+                   title="单个仓库单笔订单满99包邮（西部大仓覆盖的川渝地区满58元包邮），E宠自营快递覆盖区域满58包邮；不包邮地区：西藏、新疆；不包邮快递：顺丰、EMS；"><img
+                        src="images/shopping/common/freeshipping.png" style="vertical-align:middle"/>99元包邮</a>
+                <a href="javascript:void(0)" title="在不影响该商品二次销售的情况下，自收到商品30天内，可申请退换货服务（定制狗牌、蛋糕等特殊商品除外）。"><img
+                        src="images/shopping/common/thirtydays.png" style="vertical-align:middle"/>30天退货</a>
+            </div>
+
+            <div class="dt-ifm-box4">
+                <button id="orderBtn" class="btn1" style="width: 196px;height: 56px">立即购买</button>
+                <button id="cartBtn" class="btn2" style="width: 196px;height: 56px">加入购物车</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="deta-info2">
+        <div class="dt-if2-r f-r">
+            <ul class="if2-tit2">
+                <li class="current" com-det="dt1"><a href="JavaScript:;">宠物信息</a></li>
+                <li com-det="dt2"><a href="JavaScript:;">宠物评论</a></li>
+                <div style="clear:both;"></div>
+            </ul>
+            <div style="border:1px solid #DBDBDB;" com-det-show="dt1" id="imgdec">
+
+            </div>
+            <div style="display:none;" com-det-show="dt2">
+                </dl>
+                <div class="if2-r-box3">
+                    <dl>
+                        <dt>
+                            <a href="javascript:void(0)"><img src="images/box3-dt-tu.gif"/></a>
+                        </dt>
+                        <dd>
+                            <a href="javascript:void(0)">胡**</a>
+                            <p class="b3-p1">赞赞赞赞赞赞赞赞赞赞赞赞赞！！！！！！！！！</p>
+                            <p class="b3-p2">2020-03-12 16:57:22 </p>
+                        </dd>
+                        <div style="clear:both;"></div>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <a href="javascript:void(0)"><img src="images/box3-dt-tu.gif"/></a>
+                        </dt>
+                        <dd>
+                            <a href="javascript:void(0)">胡**</a>
+                            <p class="b3-p1">赞赞赞赞赞赞赞赞赞赞赞赞赞！！！！！！！！！</p>
+                            <p class="b3-p2"><span></span><span></span>2020-3-15 16:57:22</p>
+                            <div style="clear:both;"></div>
+                            <div class="b3-zuijia">
+                                <p class="zj-p1">追加评论：</p>
+                                <p class="zj-p2">赞赞赞赞赞赞赞赞赞赞赞赞赞！！！！！！！！！</p>
+                                <p class="zj-p3">2020-04-03 16:57:22</p>
+                            </div>
+                        </dd>
+                        <div style="clear:both;"></div>
+                    </dl>
+
+                </div>
+            </div>
+            <div class="if2-r-box4" style="display:none;" com-det-show="dt3">
+            </div>
+        </div>
+        <div style="clear:both;"></div>
+    </div>
+</div>
+
+<!--底部-->
+<div class="bottom"></div>
+</body>
+<script>
+    //宠物id
+    var id;
+    $(function () {
+        $(".top").load("top.html");
+        $(".nav").load("nav.html");
+        $(".bottom").load("bottom.html");
+
+        id = GetQueryString("id");
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/pet/getPet",
+            dataType: "json",
+            data: {
+                "id": id
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    var img = window.pet + "/myimg/" + data.data.mainimgUrl;
+                    // <img src="petimg/dog/9345d688d43f879410276ff6d81b0ef41ad53a09.jpg" />
+                    var mainImg = '<img src="' + img + '"/>';
+                    $("#mainImg").html(mainImg);
+                    var itemCode = '<span>商品编码:' + data.data.id + '</span>';
+                    $("#itemCode").html(itemCode);
+                    var title = '<a href="javascript:void(0)">' + data.data.title + '</a>';
+                    $("#title").html(title);
+                    var desc = data.data.description;
+                    $("#desc").html(desc);
+                    var browse = data.data.browse;
+                    $("#browse").html(browse);
+                    var primaryPrice = "¥" + data.data.primaryPrice;
+                    $("#primaryPrice").html(primaryPrice);
+                    var price = "¥" + data.data.price;
+                    $("#price").html(price);
+                    var sales = data.data.sales;
+                    $("#sales").html(sales);
+                    var stock = data.data.stock;
+                    $("#stock").html(stock);
+                    // <img src="images/if2-tu3.gif" />
+                    //         <div style="clear:both;"></div>
+                    var comm = '<div style="clear:both;"></div>';
+                    var path = window.pet + "/myimg/";
+                    var imgdec = '';
+                    for (var i = 0; i < data.data.imgs.length; i++) {
+                        var img ='<div class="if2-tu2">\n' +
+                            '<img src="' + path + data.data.imgs[i] + '" />' + comm +
+                            '                </div>';
+                        imgdec += img;
+                    }
+                    $("#imgdec").html(imgdec);
+                }
+            }
+        });
+    });
+
+    var userId = 0;
+    //添加购物车
+    $("#cartBtn").click(function () {
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/cart/createCart",
+            dataType: "json",
+            data: {
+                "userId": window.localStorage.getItem("uid"),
+                "petId": id,
+                "amount": $("#amount").val()
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    alert("添加购物车成功")
+                } else {
+                    alert("用户未登录");
+                    window.location.href = "登录.html";
+                }
+            }
+        });
+    });
+
+    //下单
+    $("#orderBtn").click(function () {
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/order/createOrder",
+            dataType: "json",
+            data: {
+                "userId": window.localStorage.getItem("uid"),
+                "petId": id,
+                "amount": $("#amount").val()
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    alert("下单成功")
+                } else {
+                    alert("用户未登录");
+                    window.location.href = "登录.html";
+                }
+            }
+        });
+    });
+
+
+    // 数量加减
+    $("#box3-right").click(function (event) {
+        amount = $("#amount").val();
+        if (amount > 0) {
+            amount++;
+        }
+        $("#amount").val(amount);
+    });
+    $("#box3-left").click(function (event) {
+        amount = $("#amount").val();
+        if (amount > 1) {
+            amount--;
+        }
+        $("#amount").val(amount);
+    });
+</script>
+</html>

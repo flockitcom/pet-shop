@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zq.dao.OrderDoMapper">
+  <resultMap id="BaseResultMap" type="com.zq.bean.OrderDo">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="order_no" jdbcType="VARCHAR" property="orderNo" />
+    <result column="time" jdbcType="TIMESTAMP" property="time" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="pet_id" jdbcType="INTEGER" property="petId" />
+    <result column="pet_price" jdbcType="DOUBLE" property="petPrice" />
+    <result column="amount" jdbcType="INTEGER" property="amount" />
+    <result column="order_price" jdbcType="DOUBLE" property="orderPrice" />
+    <result column="promo_id" jdbcType="INTEGER" property="promoId" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, order_no, time, user_id, pet_id, pet_price, amount, order_price, promo_id, status
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from order_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByUserIdAndStatus" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from order_info
+    where user_id = #{userId,jdbcType=INTEGER}
+    and status = #{status,jdbcType=INTEGER}
+  </select>
+  <select id="selectOrderByStatus" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from order_info
+    where status = #{status,jdbcType=INTEGER}
+  </select>
+  <select id="selectOrderByOrderNo" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from order_info
+    where order_no = #{orderNo,jdbcType=VARCHAR}
+  </select>
+  <select id="selectOrderByEmail" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from order_info
+    where order_no = #{orderNo,jdbcType=VARCHAR}
+  </select>
+  <select id="selectOrderByStart" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from order_info
+    where time &gt; #{start,jdbcType=VARCHAR}
+    and status = #{status,jdbcType=INTEGER}
+  </select>
+  <select id="selectOrderByEnd" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from order_info
+    where time &lt; #{end,jdbcType=VARCHAR}
+    and status = #{status,jdbcType=INTEGER}
+  </select>
+  <select id="selectOrderByDate" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from order_info
+    where time &gt; #{start,jdbcType=VARCHAR}
+    and time &lt; #{end,jdbcType=VARCHAR}
+    and status = #{status,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from order_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByOrderNo">
+    delete from order_info
+    where order_no = #{orderNo,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.zq.bean.OrderDo">
+    insert into order_info (id, order_no, time, 
+      user_id, pet_id, pet_price, 
+      amount, order_price, promo_id, 
+      status)
+    values (#{id,jdbcType=INTEGER}, #{orderNo,jdbcType=VARCHAR}, #{time,jdbcType=TIMESTAMP}, 
+      #{userId,jdbcType=INTEGER}, #{petId,jdbcType=INTEGER}, #{petPrice,jdbcType=DOUBLE}, 
+      #{amount,jdbcType=INTEGER}, #{orderPrice,jdbcType=DOUBLE}, #{promoId,jdbcType=INTEGER}, 
+      #{status,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zq.bean.OrderDo">
+    insert into order_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="orderNo != null">
+        order_no,
+      </if>
+      <if test="time != null">
+        time,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="petId != null">
+        pet_id,
+      </if>
+      <if test="petPrice != null">
+        pet_price,
+      </if>
+      <if test="amount != null">
+        amount,
+      </if>
+      <if test="orderPrice != null">
+        order_price,
+      </if>
+      <if test="promoId != null">
+        promo_id,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="orderNo != null">
+        #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null">
+        #{time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="petId != null">
+        #{petId,jdbcType=INTEGER},
+      </if>
+      <if test="petPrice != null">
+        #{petPrice,jdbcType=DOUBLE},
+      </if>
+      <if test="amount != null">
+        #{amount,jdbcType=INTEGER},
+      </if>
+      <if test="orderPrice != null">
+        #{orderPrice,jdbcType=DOUBLE},
+      </if>
+      <if test="promoId != null">
+        #{promoId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zq.bean.OrderDo">
+    update order_info
+    <set>
+      <if test="orderNo != null">
+        order_no = #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null">
+        time = #{time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="userId != null">
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="petId != null">
+        pet_id = #{petId,jdbcType=INTEGER},
+      </if>
+      <if test="petPrice != null">
+        pet_price = #{petPrice,jdbcType=DOUBLE},
+      </if>
+      <if test="amount != null">
+        amount = #{amount,jdbcType=INTEGER},
+      </if>
+      <if test="orderPrice != null">
+        order_price = #{orderPrice,jdbcType=DOUBLE},
+      </if>
+      <if test="promoId != null">
+        promo_id = #{promoId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zq.bean.OrderDo">
+    update order_info
+    set order_no = #{orderNo,jdbcType=VARCHAR},
+      time = #{time,jdbcType=TIMESTAMP},
+      user_id = #{userId,jdbcType=INTEGER},
+      pet_id = #{petId,jdbcType=INTEGER},
+      pet_price = #{petPrice,jdbcType=DOUBLE},
+      amount = #{amount,jdbcType=INTEGER},
+      order_price = #{orderPrice,jdbcType=DOUBLE},
+      promo_id = #{promoId,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="confirmOrder" parameterType="com.zq.bean.OrderDo">
+    update order_info
+    set status = 5
+    where order_no = #{orderNo,jdbcType=VARCHAR}
+  </update>
+  <update id="sendOrder" parameterType="com.zq.bean.OrderDo">
+    update order_info
+    set status = 3
+    where order_no = #{orderNo,jdbcType=VARCHAR}
+  </update>
+</mapper>

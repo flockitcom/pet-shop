@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>宠物商城-首页</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/zhonglin.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+
+<body>
+    <!--头部-->
+    <div id="top" style="height: 224.4px"></div>
+    <!--导航栏-->
+    <div id="nva"></div>
+    <!--二级宠物商城-->
+    <div id="main"></div>
+    <!--底部-->
+    <div id="bottom"></div>
+</body>
+<script>
+    $(function () {
+        $("#top").load("top.html");
+        $("#nva").load("nav.html");
+        $("#main").load("main.html");
+        $("#bottom").load("bottom.html");
+    });
+</script>
+</html>

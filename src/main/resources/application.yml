@@ -1,0 +1,42 @@
+server:
+  port: 80
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+spring:
+  resources:
+    static-locations: classpath:/static/
+  devtools:
+    restart:
+      exclude: static
+
+
+#    编译配置
+  datasource:
+    name: petmanage
+    url: jdbc:mysql://127.0.0.1:3306/petmanage?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: root
+
+##   发布配置
+#  datasource:
+#    name: petmanage
+#    url: jdbc:mysql://127.0.0.1:3306/petmanage?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+#    username: petmanage
+#    password: Npk2dabneF6t722m
+
+    # 配置druid
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+
+
+  #    编译配置116.62.50.16
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+
+  #mail
+  mail:
+    host: smtp.163.com
+    username: 13294141428@163.com
+    password: asd456852

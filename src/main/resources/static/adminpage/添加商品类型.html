@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>发布商品</title>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+<body>
+<from>
+    <tbody>
+    <table>
+        <tr>
+            <th width="120"><span style="color: red">*</span>宠物类型名称</th>
+            <td><input type="text" id="name" placeholder="请输入宠物类型名称"></td>
+        </tr>
+
+        <tr>
+            <th width="120"><span style="color: red">*</span>商城名称</th>
+            <td><input type="text" id="shopping" placeholder="请输入商城名称" ></td>
+        </tr>
+        <tr>
+            <th width="120"><span style="color: red">*</span>产品特质</th>
+            <!--<td><input type="text"  id="description" placeholder="请输入商城名称" style="width: 300px;height: 150px"></td>-->
+            <td><textarea rows="10" cols="30" id="description" placeholder="请输入商城名称"></textarea></td>
+        </tr>
+        <tr>
+            <th>商品图片</th>
+            <td>
+                <input type="file" id="file" name="file" >
+                <br>
+                <span id="img">
+
+                </span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <button id="addPet" >提 交</button>
+</from>
+</body>
+<script>
+    var typeImg = '';
+    var id = GetQueryString("id");
+
+    $(function () {
+        if (null != id){
+            $.ajax({
+                type: "POST",
+                url: window.pet+"/pet/getPetTypeById",
+                dataType: "json",
+                data: {
+                    "id": id
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        $("#name").attr("value",data.data.name);
+                        $("#shopping").attr("value",data.data.shopping);
+                        $("#description").html(data.data.description);
+                        typeImg = data.data.img;
+                        var img = window.pet + '/myimg/' + data.data.img;
+                        img = '<img style="height: 350px" src="'+img+'">\n';
+                        $("#img").html(img);
+                        // form.render();
+                    }
+                }
+            });
+        }
+    });
+
+    $("#file").change(function () {
+        var formData = new FormData();
+        formData.append('file', $("#file")[0].files[0]);
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/pet/imgUpload",
+            cache: false,
+            dataType: "json",
+            data: formData,
+            processData: false,
+            contentType: false,
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    typeImg = data.data;
+                    var img = window.pet + '/myimg/' + data.data;
+                    img = '<img style="width: 300px" src="'+img+'">\n';
+                    $("#img").html(img);
+                } else {
+                    alert("data.data.errMsg");
+                }
+            }
+        });
+    });
+
+    $("#addPet").click(function () {
+        if (null != id){
+            //修改商品类型
+            $.ajax({
+                type: "POST",
+                url: window.pet+"/pet/updatePetTypeById",
+                dataType: "json",
+                data: {
+                    "id": id,
+                    "name": $("#name").val(),
+                    "shopping": $("#shopping").val(),
+                    "description": $("#description").val(),
+                    "img": typeImg
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        alert("修改成功");
+                    }else {
+                        alert(data.data);
+                    }
+                }
+            });
+        }else{
+            //创建商品类型
+            $.ajax({
+                type: "POST",
+                url: window.pet+"/pet/createPetType",
+                dataType: "json",
+                data: {
+                    "name": $("#name").val(),
+                    "shopping": $("#shopping").val(),
+                    "description": $("#description").val(),
+                    "img": typeImg
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        alert("添加成功");
+                    }else {
+                        alert("添加失败");
+                    }
+                }
+            });
+        }
+
+    });
+</script>
+</html>

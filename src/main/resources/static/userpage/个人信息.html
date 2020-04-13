@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>个人资料</title>
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+<link rel="stylesheet" type="text/css" href="css/shopping-mall-index.css" />
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/zhonglin.js"></script>
+<script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+
+<body style="position:relative;">
+
+	<!--头部-->
+	<div id="top" style="height: 224.4px"></div>
+	<!--导航栏-->
+	<div id="nva"></div>
+    
+    <!--内容开始-->
+    <div class="personal w1200">
+
+    	<div class="personal-r f-r">
+        	<div class="personal-right">
+                <div class="personal-r-tit">
+                    <h3>个人资料</h3>
+                </div>
+                <div class="data-con">
+                	<div class="dt1">
+                    	<p class="f-l">当前头像：</p>
+                        <div class="touxiang f-l">
+                        	<div class="tu f-l">
+                            	<a href="javascript:void(0)">
+                                	<img src="" id="uImg"/>
+                                    <input type="file" name="" id="file" class="img1" />
+                                </a>
+                            </div>
+                            <a href="JavaScript:;" class="sc f-l" shangchuang="">上传头像</a>
+                            <div style="clear:both;"></div>
+                        </div>
+                        <!--<form action="/file_upload" method="post" enctype="multipart/form-data">-->
+                            <!--<input type="file" name="image" size="50" />-->
+                            <!--<br />-->
+                            <!--<button type="submit">上传</button>-->
+                        <!--</form>-->
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div class="dt1">
+                    	<p class="dt-p f-l">用户名：</p>
+                        <input type="text" id="uname" />
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div class="dt1">
+                    	<p class="dt-p f-l">地址：</p>
+                        <input type="text" id="uaddress" />
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div class="dt1 dt2">
+                    	<p class="dt-p f-l">性别：</p>
+                        <input type="radio" name="hobby" value="1" checked="checked" id="redio01"/><span>男</span>
+                        <input type="radio" name="hobby" value="2" id="redio02"/><span>女</span>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div class="dt1">
+                    	<p class="dt-p f-l">年龄：</p>
+                        <input type="text" id="uage" />
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div class="dt1 dt3">
+                    	<p class="dt-p f-l">邮箱：</p>
+                        <input type="text" id="uemail" />
+                        <button id="u_info_code">获取邮箱验证码</button>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div class="dt1">
+                    	<p class="dt-p f-l">验证码：</p>
+                        <input type="text" id="emailCode" />
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div class="dt1">
+                    	<p class="dt-p f-l">手机号：</p>
+                        <input type="text" id="utelphone" />
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div class="dt1 dt4">
+                    	<p class="dt-p f-l">密码：</p>
+                        <input type="text" id="upwd" />
+                        <!--<button>修改密码</button>-->
+                        <div style="clear:both;"></div>
+                    </div>
+                    <button class="btn-pst" id="u_info_btn">保存</button>
+                </div>
+            </div>
+        </div>
+        <div style="clear:both;"></div>
+    </div>
+    
+    <!--&lt;!&ndash;上传头像弹窗&ndash;&gt;-->
+    <!--<div class="tanchuang">-->
+    	<!--<div class="t-c-bg"></div>-->
+    	<!--<div class="t-c-con">-->
+        	<!--<div class="tc-tit">-->
+            	<!--<h3>上传头像</h3>-->
+                <!--<a href="JavaScript:;" delete=""><img src="images/t-c-del.gif" /></a>-->
+                <!--<div style="clear:both;"></div>-->
+            <!--</div>-->
+            <!--<div class="tc-con">-->
+            	<!--<a href="javascript:void(0)"><img src="images/tc-tu.gif" /></a>-->
+                <!--<button>保存头像</button>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>&ndash;&gt;-->
+
+	<!--底部-->
+	<div id="bottom"></div>
+</body>
+<script>
+    var headImg = '';
+    var uImg = '';
+
+	$(function () {
+		$("#top").load("top.html");
+		$("#nva").load("nav.html");
+		$("#bottom").load("bottom.html");
+
+        if (window.localStorage.getItem("uid") == null) {
+		    alert("用户未登录");
+		    window.location.href="登录.html";
+        }
+        $.ajax({
+            type: "GET",
+            url: window.pet+"/user/getCurrentUser",
+            dataType: "json",
+            data: {
+                "id" : window.localStorage.getItem("uid")
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    uImg = window.pet + "/myimg/"+ data.data.headImg;
+                    headImg = data.data.headImg;
+                    $("#uImg").attr("src",uImg);
+                    $("#uname").attr('value',data.data.name);
+                    $("#uaddress").attr('value',data.data.address);
+                    $("#uage").attr('value',data.data.age);
+                    $("#uemail").attr('value',data.data.email);
+                    $("#utelphone").attr('value',data.data.telphone);
+                    $("#upwd").attr('value',data.data.password);
+                    if (data.data.gender==2){
+                        $("#redio02").attr("checked","checked");
+                    }
+                }else {
+                    alert("用户未登录");
+                    window.location.href="登录.html";
+                }
+            }
+        });
+
+	});
+
+
+	$("#u_info_btn").click(function () {
+        var gender = 0;
+        if ($("#redio01").is(":checked")){
+            gender = 1;
+        }else {
+            gender = 2;
+        }
+        // var newImg = $("#uImg")[0].src;
+        // console.log(newImg);
+        $.ajax({
+            type: "Post",
+            url: window.pet+"/user/updateUser",
+            dataType: "json",
+            data: {
+                "id" : window.localStorage.getItem("uid"),
+                "name": $("#uname").val(),
+                "address": $("#uaddress").val(),
+                "age": $("#uage").val(),
+                "telphone": $("#utelphone").val(),
+                "password": $("#upwd").val(),
+                "gender" : gender,
+                "email": $("#uemail").val(),
+                "emailCode": $("#emailCode").val(),
+                "headImg": headImg,
+                "oldImg":uImg
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    alert("用户信息修改成功,请重新登录!");
+                    window.location.href="登录.html";
+                    $.ajax({
+                        type: "GET",
+                        url: window.pet+"/user/exit",
+                        dataType: "json",
+                        data: {
+                            "id": window.localStorage.getItem("uid")
+                        },
+                        xhrFields: {withCredentials: true},
+                        success: function (data) {
+
+                        }
+                    });
+                } else {
+                    alert("用户信息跟新失败,原因为:" + data.data.errMsg);
+                }
+            },
+            error: function (data) {
+                    alert("注册失败,原因为:" + data.responseText);
+            }
+        });
+    });
+
+    $("#u_info_code").click(function () {
+        $.ajax({
+            type: "GET",
+            url: window.pet+"/user/emailCode",
+            dataType: "json",
+            data: {
+                "email": $("#uemail").val()
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    console.log(data.data);
+                    alert("验证码发送成功");
+                } else {
+                    alert("验证码发送失败,原因为" + data.data.errMsg);
+                }
+            },
+            error: function (data) {
+                alert("验证码发送,原因为" + data.responseText);
+            }
+        });
+    });
+
+
+    // 上传图片
+    $("#file").change( function(){
+        var formData = new FormData();
+        formData.append('file', $("#file")[0].files[0]);
+        $.ajax({
+            type: "POST",
+            url: window.pet+"/user/headImg",
+            cache:false,
+            dataType: "json",
+            data: formData,
+            processData:false,
+            contentType:false,
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    headImg = data.data;
+                } else {
+                    alert("data.data.errMsg");
+                }
+            }
+        });
+    });
+
+</script>
+
+</html>

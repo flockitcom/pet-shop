@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <title>后台管理系统</title>
+    <link rel="stylesheet" href="layui/css/layui.css"/>
+    <link rel="stylesheet" href="css/admin.css"/>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="../my/mypet.js"></script>
+
+</head>
+<body>
+    <form class="layui-form" action="">
+	    <table class="layui-table layui-table-add" lay-skin="nob">
+		  <tbody>
+			 <tr>
+				  <th width="100">管理员id</th>
+				  <td>
+					  <div style="width:70%">
+						  <p id="adminId"></p>
+					  </div>
+				  </td>
+			 </tr>
+		    <tr>
+		      <th width="100">管理员姓名</th>
+		      <td>
+				<div style="width:70%">
+		      		<input id="adminRealName" type="text" name="" autocomplete="off" class="layui-input">
+		      	</div>
+		      </td>
+		    </tr>
+		    <tr>
+		      <th>管理员账号</th>
+		      <td>
+		        <div style="width:70%">
+		      		<input id="adminName" type="text" name="" autocomplete="off" class="layui-input">
+		        </div>
+		      </td>
+		    </tr>
+			 <tr>
+				 <th>管理员密码</th>
+				 <td>
+					 <div style="width:70%">
+						 <input id="adminPwd" type="text" name="" autocomplete="off" class="layui-input">
+					 </div>
+				 </td>
+			 </tr>
+		    <tr>
+		      <th style="vertical-align: middle;">管理员等级</th>
+		      <td>
+		        <div class="mb10"><input type="radio" name="adminQ" id="adminQ1" title=" " class="my-radio"><div class="layui-unselect layui-form-radio" lay-skin=""><i class="layui-icon"></i></div><label>超级管理员</label></div>
+		        <div class="mb10"><input type="radio" name="adminQ" id="adminQ2" title=" " checked="checked" class="my-radio"><div class="layui-unselect layui-form-radio" lay-skin=""><i class="layui-icon">&nbsp;</i></div><label>普通管理员</label></div>
+		      </td>
+		    </tr>
+		  </tbody>
+		</table>
+		<div style="margin-left: 145px; margin-bottom: 15px;">	
+			<div id="adminBtn" class="layui-btn" style=" min-width: 150px;">确 定</div>
+		</div>
+	</form>
+
+
+	<script type="text/javascript" src="layui/layui.js"></script>
+	<script>
+		layui.use(['jquery','form'], function(){
+			var id = GetQueryString("id");
+			var	form = layui.form();
+			// load(id);
+			if (null != id){
+				$.ajax({
+					type: "POST",
+					url: window.pet+"/admin/getAdmin",
+					dataType: "json",
+					data: {
+						"id": id
+					},
+					xhrFields: {withCredentials: true},
+					success: function (data) {
+						if (data.status == "success") {
+							$("#adminId").html(data.data.id);
+							$("#adminRealName").attr("value",data.data.realname);
+							$("#adminName").attr("value",data.data.name);
+							$("#adminPwd").attr("value",data.data.password);
+							if (1 == data.data.permissions){
+								$("#adminQ1").attr("checked","checked");
+								form.render();
+							}
+							form.render();
+						}
+					}
+				});
+			}
+
+			$("#adminBtn").click(function () {
+				var adminQ = 0;
+				if ($("#adminQ1").is(":checked")){
+					adminQ = 1;
+				}else {
+					adminQ = 0;
+				}
+				if (null != id){
+					//修改管理员
+					$.ajax({
+						type: "Post",
+						url: window.pet+"/admin/updateAdmin",
+						dataType: "json",
+						data: {
+							"currentId" : window.localStorage.getItem("aid"),
+							"id": $("#adminId").html(),
+							"realname": $("#adminRealName").val(),
+							"name": $("#adminName").val(),
+							"password": $("#adminPwd").val(),
+							"permissions": adminQ
+						},
+						xhrFields: {withCredentials: true},
+						success: function (data) {
+							if (data.status == "success") {
+								alert("管理员修改成功.");
+								parent.location.reload();
+								parent.layer.close(parent.layer.getFrameIndex(window.name));
+							} else {
+								alert(data.data.errMsg);
+							}
+						}
+					});
+				} else {
+					//增加管理员
+					$.ajax({
+						type: "Post",
+						url: window.pet+"/admin/createAdmin",
+						dataType: "json",
+						data: {
+							"currentId" : window.localStorage.getItem("aid"),
+							"realname": $("#adminRealName").val(),
+							"name": $("#adminName").val(),
+							"password": $("#adminPwd").val(),
+							"permissions": adminQ
+						},
+						xhrFields: {withCredentials: true},
+						success: function (data) {
+							if (data.status == "success") {
+								alert("管理员创建成功.");
+								parent.location.reload();
+								parent.layer.close(parent.layer.getFrameIndex(window.name));
+							} else {
+								alert(data.data.errMsg);
+							}
+						}
+					});
+				}
+
+			});
+		});
+
+	</script>
+</body>
+</html>

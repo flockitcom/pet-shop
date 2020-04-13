@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <title>宠物商店管理系统</title>
+    <link rel="stylesheet" href="layui/css/layui.css"/>
+    <link rel="stylesheet" href="css/admin.css"/>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+<body>
+<div class="container">
+    <blockquote class="layui-elem-quote"><span style="color:#FF5722" id="welcome"></span>
+        <p>宠物商城管理系统欢迎您！</p></blockquote>
+
+    <fieldset class="layui-elem-field site-demo-button">
+        <legend>本日统计</legend>
+        <div class="layui-form">
+            <table class="layui-table" lay-skin="nob">
+                <tbody id="nowday">
+
+                </tbody>
+            </table>
+        </div>
+    </fieldset>
+    <fieldset class="layui-elem-field site-demo-button">
+        <legend>本月统计</legend>
+        <div class="layui-form">
+            <table class="layui-table" lay-skin="nob">
+                <tbody id="nowMonth">
+
+                </tbody>
+            </table>
+        </div>
+    </fieldset>
+</div>
+
+<script type="text/javascript" src="layui/layui.js"></script>
+<script type="text/javascript" src="js/echarts.common.min.js"></script>
+<script>
+    layui.use(['jquery', 'form'], function () {
+        var form = layui.form();
+
+        $.ajax({
+            type: "Post",
+            url: window.pet + "/admin/getCurrentAdmin",
+            dataType: "json",
+            data: {
+                "id": window.localStorage.getItem("aid")
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    var permissions = '';
+                    if (data.data.permissions == '1') {
+                        permissions = "超级管理员";
+                    } else {
+                        permissions = "普通管理员";
+                    }
+                    $("#welcome").html(permissions);
+                } else {
+                    alert("用户未登录");
+                    window.location.href = "登录.html";
+                }
+            }
+        });
+    });
+
+    $(function () {
+        var nowDay = new Date().getDate(); //当前日
+        var nowMonth = new Date().getMonth()+1; //当前月
+        var nowyear = new Date().getFullYear();//当前年
+        if ((nowMonth) < 10) {
+            nowMonth = "0" + nowMonth;
+        }
+        if ((nowDay) < 10) {
+            nowDay = "0" + nowDay;
+        }
+        var myDay = nowyear+"-"+nowMonth+"-"+nowDay;//本日
+        var myMonth = nowyear+"-"+nowMonth+"-"+'01';//本月
+        orderData(myDay,'day');
+        orderData(myMonth,'month');
+
+    });
+
+    function orderData(date, mydate) {
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/order/OrderStatistics",
+            dataType: "json",
+            data: {
+                "date": date,
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    tbody= '<tr>\n' +
+                        '                    <td>待发货订单：'+data.data.noSendOrder+'个</td>\n' +
+                        '                    <td>待签收订单：'+data.data.noReceiptOrder+'个</td>\n' +
+                        '                </tr>\n' +
+                        '                <tr>\n' +
+                        '                    <td>已完成订单：'+data.data.successOrder+'个</td>\n' +
+                        '                    <td>待发货订单金额：<span class="price">'+data.data.noSendPrice+'</span></td>\n' +
+                        '                </tr>\n' +
+                        '                <tr>\n' +
+                        '                    <td>待签收订单金额：<span class="price">'+data.data.noReceiptPricer+'</span></td>\n' +
+                        '                    <td>已完成订单金额：<span class="price">'+data.data.successPricer+'</span></td>\n' +
+                        '                </tr>';
+                    if ('day'==mydate){
+                        $("#nowday").html(tbody);
+                    }
+                    if ('month'==mydate){
+                        $("#nowMonth").html(tbody);
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

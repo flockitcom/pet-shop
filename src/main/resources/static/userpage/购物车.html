@@ -1,0 +1,369 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>购物车</title>
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+<link rel="stylesheet" type="text/css" href="css/shopping-mall-index.css" />
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/zhonglin.js"></script>
+<script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+
+<body style="position:relative;">
+    <div class="top" style="height: 224.4px"></div>
+    
+    <!--内容开始-->
+    <div class="cart-content w1200">
+    	<ul class="cart-tit-nav">
+            <li class="current"><a id="cartTotal">    </a></li>
+            <div style="clear:both;"></div>
+        </ul>
+        <div class="cart-con-tit">
+        	<p class="p1">
+				<span>&nbsp;</span>
+            </p>
+            <p class="p2" id="p2">商品信息</p>
+            <p class="p4">数量</p>
+            <p class="p5">单价（元）</p>
+            <p class="p6">金额（元）</p>
+            <p class="p7">操作</p>
+        </div>
+        <div class="cart-con-info" id="cart">
+
+
+        </div>
+
+        <!--分页-->
+        <div class="paging" id="paging">
+
+        </div>
+        <div class="md-ft">
+            <P class="md-p1"><input id="checkAll" type="checkbox" /><span>全选</span></P>
+            <a onclick="delAll()" href="javascript:void(0)" >删除</a>
+            <a onclick="saveAll()" href="javascript:void(0)" >提交</a>
+            <button onclick="pay()">结算</button>
+        </div>
+    </div>
+
+    <!--底部-->
+    <div class="bottom"></div>
+</body>
+<script>
+
+    $(function () {
+        $(".top").load("top.html");
+        $(".bottom").load("bottom.html");
+
+        var pageNo = GetQueryString("pageNo");
+        if (pageNo == null){
+            pageNo = 1;
+        }
+        loadCart(window.localStorage.getItem("uid"),pageNo);
+
+
+    });
+
+    function loadCart(userId,pageNo) {
+
+        $.ajax({
+            type: "POST",
+            url: window.pet+"/cart/findCartByUserId",
+            dataType: "json",
+            data: {
+                "userId": window.localStorage.getItem("uid"),
+                "pageNo": pageNo
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    $("#cartTotal").html("全部商品     "+data.data.total);
+                    var cart_info = "";
+                    var num = data.data.endRow-data.data.startRow+1;
+                    for (var i = 0; i <num; i++) {
+                        var cart = '<div class="info-mid">\n' +
+                            '            \t<input onclick="check()" type="checkbox" value="'+data.data.list[i].id+','+data.data.list[i].petId+'" name="hobby" class="mid-ipt f-l"></input>\n' +
+                            '                <div class="mid-tu f-l">\n' +
+                            '                \t<a href="商品详情.html?id='+data.data.list[i].petId+'"><img src="'+window.pet+"/myimg/"+data.data.list[i].petDo.mainimgUrl+'" style="width: 80px;height: 80px"/></a>\n' +
+                            '                </div>\n' +
+                            '                <div class="mid-font f-l">\n' +
+                            '                \t<a style="width: 220px;height: 80px" href="商品详情.html?id='+data.data.list[i].petId+'">'+data.data.list[i].petDo.title+'</a>\n' +
+                            '                </div>\n' +
+                            '                <div class="mid-sl f-l">\n' +
+                            '                \t<a href="JavaScript:;" class="sl-left" onclick="subtract(this)">-</a>\n' +
+                            '                    <input type="text" value="'+data.data.list[i].amount+'" id="cart_amount'+i+'" />\n' +
+                            '                    <a href="JavaScript:;" class="sl-right" onclick="add(this)">+</a>\n' +
+                            '                </div>\n' +
+                            '                <p class="mid-dj f-l" style="width: 30px">'+'￥'+data.data.list[i].petDo.price+'</p>\n' +
+                            '                <p class="mid-je f-l" style="width: 55px">'+'￥'+data.data.list[i].totalPrice+'</p>\n' +
+                            '                <div class="mid-chaozuo f-l">\n' +
+                            '                \t<a  href="javascript:void(0)"></a>\n' +
+                            '                    <a onclick="deleteCart('+data.data.list[i].id+')" href="JavaScript:void(0);">&nbsp;&nbsp;&nbsp;&nbsp;删除</a>\n' +
+                            '                    <a onclick="save(this'+','+data.data.list[i].id+')" href="JavaScript:void(0);">&nbsp;&nbsp;&nbsp;&nbsp;提交</a>\n' +
+                            '                </div>\n' +
+                            '                <div style="clear:both;"></div>\n' +
+                            '            </div>';
+                        cart_info += cart;
+                    }
+                    $("#cart").html(cart_info);
+
+                    //分页栏
+                    var paging = '';
+                    var paging01 = '<div class="pag-left f-l" style="width: 600px">\n' +
+                        '                        <a onclick="loadCart('+userId+','+'1'+')" href="javascript:void(0)"  class="about left-r f-l"  style="width: 50px">首页</a>\n' +
+                        '                        <p class="about left-r f-l" style="width: 50px;background: white">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n';
+                    paging += paging01;
+                    if (data.data.hasPreviousPage) {
+                        var beforeNum = '<a onclick="loadCart('+userId+','+data.data.prePage+')" href="javascript:void(0)" class="about left-r f-l"><</a>\n';
+                        paging += beforeNum;
+                    }
+
+                    var paging02='<ul class="left-m f-l">\n';
+                    paging += paging02;
+
+
+
+                    var begin;
+                    var end;
+                    if (data.data.pages<8) {
+                        begin = 1;
+                        end = data.data.pages;
+                    }else {
+                        //1总页面超过8页
+                        begin = data.data.pageNum - 4;
+                        end = data.data.pageNum + 3;
+
+                        // 2前面不够4页
+                        if (begin < 1) {
+                            begin = 1;
+                            end = begin + 7;
+                        }
+
+                        // 3后面不总3页
+                        if (end > data.data.pages){
+                            end = data.data.pages;
+                            begin = end -7;
+                        }
+                    }
+
+                    for (var i = begin; i <=end ; i++) {
+                        var li;
+                        if (data.data.pageNum == i){
+                            li = '<li onclick="loadCart('+userId+','+i+')" class="current"><a href="javascript:void(0)">'+i+'</a></li>';
+                        } else {
+                            li = '<li onclick="loadCart('+userId+','+i+')"><a href="javascript:void(0)">'+i+'</a></li>';
+                        }
+                        paging += li;
+                    }
+
+                    var paging03 = '<div style="clear:both;"></div>\n' +
+                        '                        </ul>\n';
+                    paging += paging03;
+                    if (data.data.hasNextPage) {
+                        var nextNum = '<a onclick="loadCart('+userId+data.data.nextPage+')" href="javascript:void(0)" class="about left-l f-l">></a>';
+                        paging += nextNum;
+                    }
+                    paging += '                        <p class="about left-r f-l" style="width: 50px;background: white">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n';
+                    var lastNum = '<a onclick="loadCart('+userId+','+data.data.pages+')" href="javascript:void(0)" class="about left-r f-l" style="width: 50px">末页</a>';
+                    paging += lastNum;
+                    var paging04 ='                        <div style="clear:both;"></div>\n' +
+                        '                    </div>\n' +
+                        '                    <div style="clear:both;"></div>';
+                    paging += paging04;
+                    $("#paging").html(paging);
+                    //url跟新
+                    window.history.pushState("page",null,"购物车.html?pageNo="+pageNo);
+                    //定位页面至顶部
+                    window.scrollTo(0,0);
+
+                }else {
+                    alert("用户未登录");
+                    window.location.href="登录.html";
+                }
+            }
+        });
+    }
+
+    //全选全部选
+    $("#checkAll").click(function () {
+        $(":checkbox[name='hobby']").prop("checked", this.checked);
+    });
+
+    //点击子复选框,全选框 选中、取消
+    function check() {
+        var hobby = document.getElementsByName("hobby");
+        if (!hobby.check){
+            $("#checkAll").prop("checked",false);
+        }
+        var hobbylenth = hobby.length;
+        var hobbyselect = $("input[type='checkbox'][name='hobby']:checked").length;
+        if (hobbylenth == hobbyselect){
+            $("#checkAll").prop("checked",true);
+        }
+    }
+
+    //结算
+    function pay() {
+        var hobby = $("input[type='checkbox'][name='hobby']:checked");
+        var money = 0;
+        hobby.each(function () {
+            // data += $(this).val() + ",";
+            var data = $(this).val().split(",");
+            var cartId = data[0];
+            var PetId = data[1];
+            $.ajax({
+                type: "POST",
+                url: window.pet+"/order/createOrder",
+                dataType: "json",
+                async: false,//加上这一句设置成同步
+                data: {
+                    "userId": window.localStorage.getItem("uid"),
+                    "petId": PetId,
+                    "amount": $(this).next().next().next().children("input").val()
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        money += parseInt(data.data.orderPrice);
+                        $.ajax({
+                            type: "POST",
+                            url: window.pet+"/cart/deleteCart",
+                            dataType: "json",
+                            async: false,//加上这一句设置成同步
+                            data: {
+                                "userId": window.localStorage.getItem("uid"),
+                                "cartId": cartId
+                            },
+                            xhrFields: {withCredentials: true}
+                        });
+                    }
+                }
+            });
+        });
+        alert("一共消费了:"+money+"元");
+        window.location.reload();
+    }
+
+    //批量删除
+    function delAll() {
+        var hobby = $("input[type='checkbox'][name='hobby']:checked");
+        var money = 0;
+        hobby.each(function () {
+            // data += $(this).val() + ",";
+            var data = $(this).val().split(",");
+            var cartId = data[0];
+            $.ajax({
+                type: "POST",
+                url: window.pet+"/cart/deleteCart",
+                dataType: "json",
+                data: {
+                    "userId": window.localStorage.getItem("uid"),
+                    "cartId": cartId
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+
+                    } else {
+
+                    }
+                }
+            });
+        });
+        alert("删除成功");
+        window.location.reload();
+    }
+
+    //批量提交
+    function saveAll() {
+        var hobby = $("input[type='checkbox'][name='hobby']:checked");
+        var money = 0;
+        hobby.each(function () {
+            // data += $(this).val() + ",";
+            var data = $(this).val().split(",");
+            var cartId = data[0];
+            $.ajax({
+                type: "POST",
+                url: window.pet+"/cart/updateCartAmount",
+                dataType: "json",
+                data: {
+                    "userId": window.localStorage.getItem("uid"),
+                    "cartId": cartId,
+                    "amount": $(this).next().next().next().children("input").val()
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                    } else {
+
+                    }
+                }
+            });
+        });
+        alert("提交成功");
+        window.location.reload();
+    }
+
+
+    function save(event,cartId) {
+        var amount = $(event).parent().prev().prev().prev().children("input").val();
+        $.ajax({
+            type: "POST",
+            url: window.pet+"/cart/updateCartAmount",
+            dataType: "json",
+            data: {
+                "userId": window.localStorage.getItem("uid"),
+                "cartId": cartId,
+                "amount": amount
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    window.location.reload();
+                } else {
+
+                }
+            }
+        });
+    }
+
+    function deleteCart(cartId) {
+        $.ajax({
+            type: "POST",
+            url: window.pet+"/cart/deleteCart",
+            dataType: "json",
+            data: {
+                "userId": window.localStorage.getItem("uid"),
+                "cartId": cartId
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    window.location.reload();
+                } else {
+
+                }
+            }
+        });
+    }
+
+    // 数量加减
+    function add(event) {
+        amount = $(event).prev().val();
+        if(amount>0){
+            amount++;
+        }
+        $(event).prev().val(amount);
+    };
+    function subtract(event) {
+        amount = $(event).next().val();
+        if(amount>1){
+            amount--;
+        }
+        $(event).next().val(amount);
+    };
+
+
+
+</script>
+</html>

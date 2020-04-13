@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>登录</title>
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+<link rel="stylesheet" type="text/css" href="css/shopping-mall-index.css" />
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/zhonglin.js"></script>
+<script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+
+<body>
+
+	<div class="sign-logo w1200">
+	<h1><a href="index.html" title="宠物商城"><img src="images/logo.jpg" /></a></h1>
+</div>
+
+	<div class="sign-con w1200">
+	<img src="images/logn-tu.gif" class="sign-contu f-l" />
+    <div class="sign-ipt f-l">
+    	<p>邮箱</p>
+        <input type="text" id="email" placeholder="邮箱" />
+        <p>密码</p>
+        <input type="password" id="password" placeholder="密码" /><br />
+        <button class="slig-btn" id="login">登录</button>
+        <p>没有账号？请<a href="注册.html">注册</a><a href="javascript:void(0)" class="wj">忘记密码？</a></p>
+    </div>
+    <div style="clear:both;"></div>
+</div>
+    <div class="bottom"></div>
+    
+</body>
+<script>
+    $(function () {
+        $(".bottom").load("bottom.html");
+
+    });
+
+    $("#login").on("click", function () {
+        var email = $("#email").val();
+        if (email == null || email == "") {
+            alert("邮箱不能为空!");
+            return false;
+        }
+        var password = $("#password").val();
+        if (password == null || password == "") {
+            alert("密码不能为空!");
+            return false;
+        }
+        $.ajax({
+            type: "POST",
+            url: window.pet+"/user/login",
+            dataType: "json",
+            data: {
+                "email": email,
+                "password": password
+            },
+            xhrFields:{withCredentials:true},
+            success:function (data) {
+                if (data.status == "success"){
+                    window.localStorage.setItem("uid",data.data.id);
+                    alert("登录成功");
+                    window.location.href = "index.html";
+                }else{
+                    alert("登录失败,原因为"+data.data.errMsg);
+                }
+            },
+            error:function (data) {
+                alert("登录失败,原因为"+data.responseText);
+            }
+        });
+    });
+</script>
+</html>

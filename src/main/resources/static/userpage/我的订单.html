@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>我的订单</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="css/shopping-mall-index.css"/>
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/zhonglin.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+
+<body style="position:relative;">
+
+<!--头部-->
+<div id="top" style="height: 224.4px"></div>
+<!--导航栏-->
+<div id="nva"></div>
+
+<!--内容开始-->
+<div class="personal w1200">
+    <div class="order-right f-r">
+        <div class="order-hd">
+            <dl class="f-l">
+                <dt>
+                    <a href="javascript:void(0)"><img style="width: 68px;height: 68px" id="cartUserImg" src=""/></a>
+                </dt>
+                <dd>
+                    <h3><a href="javascript:void(0)" id="cartUserName"></a></h3>
+                    <p id="cartUserEmail"></p>
+                </dd>
+                <div style="clear:both;"></div>
+            </dl>
+            <div class="ord-dai f-l">
+                <p>待发货<span id="sendNum"></span></p>
+                <p>待收货<span id="receiveNum"></span></p>
+                <a href="购买记录.html" style="margin-left: 200px;font-size: 20px ;color: red">购买记录</a>
+            </div>
+            <div style="clear:both;"></div>
+        </div>
+        <div class="order-md">
+            <div class="md-tit">
+                <h3>我的订单</h3>
+            </div>
+            <div class="md-hd">
+                <P class="md-p1"><span>&nbsp;</span></P>
+                <p class="md-p2" style="width: 340px">商品信息</p>
+                <p class="md-p4">单价（元）</p>
+                <p class="md-p5">金额（元）</p>
+                <p class="md-p6">操作</p>
+            </div>
+            <div class="md-info">
+                <div class="dai">
+                    <span>待发货</span>
+                </div>
+                <div class="dai-con" id="cartNoSend">
+
+                </div>
+            </div>
+            <div class="md-info">
+                <div class="dai">
+                    <span>待收货</span>
+                </div>
+                <div class="dai-con" id="cartNoReceive">
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div style="clear:both;"></div>
+</div>
+
+<!--底部-->
+<div id="bottom"></div>
+</body>
+<script>
+    $(function () {
+        $("#top").load("top.html");
+        $("#nva").load("nav.html");
+        $("#bottom").load("bottom.html");
+
+        loadOrder(window.localStorage.getItem("uid"));
+    });
+
+    function loadOrder(userId) {
+        // 获取当前用户信息
+        $.ajax({
+            type: "GET",
+            url: window.pet + "/user/getCurrentUser",
+            dataType: "json",
+            data: {
+                "id": window.localStorage.getItem("uid")
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    $("#cartUserImg").attr("src", window.pet + '/myimg/' + data.data.headImg);
+                    $("#cartUserName").html(data.data.name);
+                    $("#cartUserEmail").html(data.data.email);
+                } else {
+                    alert("用户未登录");
+                    window.location.href = "登录.html";
+                }
+            }
+        });
+
+        //未发货订单
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/order/findCurrentOrderByUserId",
+            dataType: "json",
+            data: {
+                "userId": window.localStorage.getItem("uid"),
+                "status": 2
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    $("#sendNum").html(data.data.list.length);
+                    var cartNoSend = '';
+                    for (var i = 0; i < data.data.list.length; i++) {
+                        var nosend = '<dl class="dl1">\n' +
+                            '                        <dt>\n' +
+                            '                            <a href="商品详情.html?id=' + data.data.list[i].petDo.id + '" class="f-l"><img style="width: 82px;height: 82px" src="' + window.pet + '/myimg/' + data.data.list[i].petDo.mainimgUrl + '" /></a>\n' +
+                            '                            <div style="clear:both;"></div>\n' +
+                            '                        </dt>\n' +
+                            '                        <dd>\n' +
+                            '                            <p>' + data.data.list[i].petDo.title + '</p>\n' +
+                            '                            <span>X ' + data.data.list[i].amount + '</span>\n' +
+                            '                        </dd>\n' +
+                            '                        <div style="clear:both;"></div>\n' +
+                            '                    </dl>\n' +
+                            '                    <div class="dai-right f-l">\n' +
+                            '                        <p class="d-r-p2">¥ ' + data.data.list[i].petPrice + '</p>\n' +
+                            '                        <p class="d-r-p3">¥ ' + data.data.list[i].orderPrice + '</p>\n' +
+                            '                        <p class="d-r-p4" style="margin-top:20px;"><a onclick="confirm(' + data.data.list[i].orderNo + ')" href="javascript:void(0)">确认收货</a><br /><a href="javascript:void(0)">&nbsp;</a></p>\n' +
+                            '                    </div>\n' +
+                            '                    <div style="clear:both;"></div>';
+                        cartNoSend += nosend
+                    }
+                    $("#cartNoSend").html(cartNoSend);
+                }
+            }
+        });
+
+        //未收货订单
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/order/findCurrentOrderByUserId",
+            dataType: "json",
+            data: {
+                "userId": window.localStorage.getItem("uid"),
+                "status": 3
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    $("#receiveNum").html(data.data.list.length);
+                    var cartNoReceive = '';
+                    for (var i = 0; i < data.data.list.length; i++) {
+                        var noreceive = '<dl class="dl1">\n' +
+                            '                        <dt>\n' +
+                            '                            <a href="javascript:void(0)" class="f-l"><img style="width: 82px;height: 82px" src="' + window.pet + '/myimg/' + data.data.list[i].petDo.mainimgUrl + '" /></a>\n' +
+                            '                            <div style="clear:both;"></div>\n' +
+                            '                        </dt>\n' +
+                            '                        <dd>\n' +
+                            '                            <p>' + data.data.list[i].petDo.title + '</p>\n' +
+                            '                            <span>X ' + data.data.list[i].amount + '</span>\n' +
+                            '                        </dd>\n' +
+                            '                        <div style="clear:both;"></div>\n' +
+                            '                    </dl>\n' +
+                            '                    <div class="dai-right f-l">\n' +
+                            '                        <p class="d-r-p2">¥ ' + data.data.list[i].petPrice + '</p>\n' +
+                            '                        <p class="d-r-p3">¥ ' + data.data.list[i].orderPrice + '</p>\n' +
+                            '                        <p class="d-r-p4" style="margin-top:20px;"><a href="javascript:void(0)" onclick="confirm(' + data.data.list[i].orderNo + ')">确认收货</a><br /><a href="javascript:void(0)">&nbsp;</a></p>\n' +
+                            '                    </div>\n' +
+                            '                    <div style="clear:both;"></div>';
+                        cartNoReceive += noreceive
+                    }
+                    $("#cartNoReceive").html(cartNoReceive);
+                }
+            }
+        });
+    }
+
+    // 确认订单
+    function confirm(orderNo) {
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/order/confirmOrder",
+            dataType: "json",
+            data: {
+                "userId": window.localStorage.getItem("uid"),
+                "orderNo": orderNo
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    window.location.reload();
+                }
+            }
+        });
+    }
+</script>
+</html>

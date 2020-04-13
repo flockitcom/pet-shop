@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>注册</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="css/shopping-mall-index.css"/>
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/zhonglin.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+
+<body>
+<div class="top" style="height: 224.4px"></div>
+
+<!--内容开始-->
+<div class="password-con registered">
+    <div class="psw">
+        <p class="psw-p1">用户名</p>
+        <input type="text" id="name" placeholder="请输入用户名"/>
+    </div>
+    <div class="psw">
+        <p class="psw-p1">输入密码</p>
+        <input type="password" id="password" placeholder="请输入密码"/>
+    </div>
+    <div class="psw">
+        <p class="psw-p1">确认密码</p>
+        <input type="password" id="pwsconfirm" placeholder="请再次确认密码"/>
+    </div>
+    <div class="psw psw2">
+        <p class="psw-p1">邮箱</p>
+        <input type="text" id="email" placeholder="请输入邮箱验证码"/>
+        <button id="getCode">获取邮箱验证码</button>
+    </div>
+    <div class="psw psw3">
+        <p class="psw-p1">验证码</p>
+        <input type="text" id="emailCode" placeholder="请输入邮箱验证码"/>
+    </div>
+    <button class="psw-btn" id="register">立即注册</button>
+    <p class="sign-in">已有账号？请<a href="登录.html">登录</a></p>
+</div>
+<div class="bottom"></div>
+</body>
+<script>
+    $(function () {
+        $(".top").load("top.html");
+        $(".bottom").load("bottom.html");
+    });
+
+
+    $("#getCode").click(function () {
+        var email = $("#email").val();
+        var myreg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+        if (!myreg.test(email)) {
+            alert("邮箱格式不正确");
+            return false;
+        }
+        $.ajax({
+            type: "GET",
+            url: window.pet+"/user/emailCode",
+            dataType: "json",
+            data: {
+                "email": email,
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    console.log(data.data);
+                    alert("验证码发送成功");
+                } else {
+                    alert("验证码发送失败,原因为" + data.data.errMsg);
+                }
+            },
+            error: function (data) {
+                alert("验证码发送,原因为" + data.responseText);
+            }
+        });
+    });
+
+    $("#register").click(function () {
+        var name = $("#name").val();
+        if (name == null || name == "") {
+            alert("用户名不能为空!");
+            return false;
+        }
+        var password = $("#password").val();
+        var pwdRegex = new RegExp('(?=.*[0-9])(?=.*[a-zA-Z]).{8,30}');
+        if (!pwdRegex.test(password)) {
+            alert("密码中必须包含字母、数字，8-30字符");
+            return false;
+        }
+        var pwsconfirm = $("#pwsconfirm").val();
+        if (password != pwsconfirm) {
+            alert("两次密码不相同");
+            return false;
+        }
+        var email = $("#email").val();
+        var myreg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+        if (!myreg.test(email)) {
+            alert("邮箱格式不正确");
+            return false;
+        }
+        var emailCode = $("#emailCode").val();
+        if (emailCode == null || emailCode == "") {
+            alert("验证码不能为空");
+            return false;
+        }
+        $.ajax({
+            type: "POST",
+            url: window.pet+"/user/register",
+            dataType: "json",
+            data: {
+                "name": name,
+                "password": password,
+                "email": email,
+                "emailCode": emailCode
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    alert("注册成功");
+                    window.location.href="登录.html";
+                } else {
+                    alert("注册失败,原因为:" + data.data.errMsg);
+                }
+            },
+            error: function (data) {
+                alert("注册失败,原因为:" + data.responseText);
+            }
+        });
+    });
+
+</script>
+</html>

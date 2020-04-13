@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>宠物分类商城</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+<body>
+    <div id="main">
+
+    </div>
+
+</body>
+<script>
+    $(function () {
+        $.ajax({
+            type: "GET",
+            url: window.pet+"/pet/getPetType",
+            dataType: "json",
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    for (var i = 0 ; i<data.data.length;i++){
+                        var pet_info = '';
+                        $.ajax({
+                            type: "POST",
+                            url: window.pet+"/pet/getPetByCondition",
+                            async: false,//加上这一句设置成同步
+                            dataType: "json",
+                            data:{
+                                "typeId": data.data[i].id,
+                                "pageSIze": 6
+                            },
+                            xhrFields: {withCredentials: true},
+                            success: function (petdata) {
+                                if (data.status == "success") {
+                                    var pet ;
+                                    var pageSize = petdata.data.endRow-petdata.data.startRow+1;
+                                    for (var j = 0 ; j<pageSize;j++){
+                                        var img = window.pet + "/myimg/" + petdata.data.list[j].mainimgUrl;
+                                        pet = '<li>\n' +
+                                            '                \t<h3><a>'+petdata.data.list[j].title+'</a></h3>\n' +
+                                            '                    <p><a style="color: red">'+'¥'+petdata.data.list[j].price+'</a></p>\n' +
+                                            '                    <a href="'+'商品详情.html?id='+petdata.data.list[j].id+'"><img style="width: 138px;height: 194px" src="'+img+'" /></a>\n' +
+                                            '                </li>';
+                                        // console.log(pet);
+                                        pet_info += pet;
+                                    }
+
+                                }
+
+                            }
+                        });
+                        var typeImg = window.pet + "/myimg/" + data.data[i].img;
+                        var main = '<div class="mall w1200 mt20">\n' +
+                            '            <div class="title1">\n' +
+                            '                <h3><span>'+(i+1)+'F </span>'+data.data[i].shopping+'</h3>\n' +
+                            '                <ul>\n' +
+                            '                    <li><a href="搜索结果.html?typeId='+data.data[i].id+'">更多</a></li>\n' +
+                            '                    <div style="clear:both;"></div>\n' +
+                            '                </ul>\n' +
+                            '                <div style="clear:both;"></div>\n' +
+                            '            </div>\n' +
+                            '            <div class="ma-con">\n' +
+                            '                <div class="ma-con-l f-l">\n' +
+                            '                    <div class="ma-l-t">\n' +
+                            '                        <a><img src="'+typeImg+'" /></a>\n' +
+                            '                    </div>\n' +
+                            '                    <div class="ma-l-b">\n' +
+                            '                        <a>'+data.data[i].description+'</a>\n' +
+                            '                    </div>\n' +
+                            '                </div>\n' +
+                            '                <ul class="ma-con-r f-l">\n' +
+                                                    pet_info +
+                            '                </ul>\n' +
+                            '                <div style="clear:both;"></div>\n' +
+                            '            </div>\n' +
+                            '        </div>';
+
+                        $("#main").append(main);
+                    }
+                }
+            }
+
+        });
+    });
+
+    $("#petpage").click()
+</script>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>发布商品</title>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+<body>
+<from>
+    <tbody>
+    <table>
+        <tr>
+            <th width="100"><span style="color: red">*</span>商品名称</th>
+            <td><input type="text" id="title" placeholder="请输入商品名称"></td>
+        </tr>
+        <tr>
+            <th width="100"><span style="color: red">*</span>商品描述</th>
+            <td><input type="text" id="description" placeholder="请输入商品描述" style="width: 300px;height: 150px"></td>
+        </tr>
+        <tr>
+            <th><span style="color: red">*</span>所属分类</th>
+            <td>
+                <select id="petSelect">
+
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th><span style="color: red">*</span>商品价</th>
+            <td>
+                ￥<input type="text" id="price" style="width: 153px" name="" >
+            </td>
+        </tr>
+        <tr>
+            <th><span style="color: red">*</span>市场价</th>
+            <td>
+                ￥<input type="text" id="primaryPrice" style="width: 153px" name="">
+            </td>
+        </tr>
+        <tr>
+            <th><span style="color: red">*</span>库存</th>
+            <td>
+                <input type="text" id="stock">
+            </td>
+        </tr>
+        <tr>
+            <th>商品图片<br>(第一张为主图)</th>
+            <td>
+                <input type="button" id="clean" value="清空图片">
+                <input type="file" id="file" name="file">
+                <br>
+                <span id="imgs">
+
+                </span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <button id="addPet">提 交</button>
+</from>
+</body>
+<script>
+    var id = '';
+    var imgs = '';
+    var typeId = 0;
+    var petSelect = '';
+    var mainImg = '';
+
+    $(function () {
+        id = GetQueryString("id");
+
+        if (null != id){
+            $.ajax({
+                type: "POST",
+                url: window.pet+"/pet/getPet",
+                dataType: "json",
+                async: false,
+                data: {
+                    "id": id
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        typeId = data.data.typeId;
+                        $("#title").attr("value",data.data.title);
+                        $("#description").attr("value",data.data.description);
+                        $("#petSelect").html(petSelect);
+                        $("#price").attr("value",data.data.price);
+                        $("#primaryPrice").attr("value",data.data.primaryPrice);
+                        $("#stock").attr("value",data.data.stock);
+                        mainImg = data.data.mainimgUrl;
+                        imgs = '<img style="width: 80px;height: 80px" src="'+window.pet + '/myimg/' + data.data.mainimgUrl+'">\n';
+                        for (var i = 0;i<data.data.imgs.length;i++){
+                            imgs += '<img style="width: 80px;height: 80px" src="'+window.pet + '/myimg/' + data.data.imgs[i]+'">\n';
+                        }
+                        console.log(imgs);
+                        $("#imgs").html(imgs);
+                    }
+                }
+            });
+            $.ajax({
+                type: "POST",
+                url: window.pet+"/pet/getPetTypeById",
+                dataType: "json",
+                asyc: false,
+                data: {
+                    "id": typeId
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        loadSecect(data.data.shopping);
+                    }
+                }
+            });
+        }else {
+            loadSecect(petSelect);
+        }
+    });
+
+    //加载下拉框
+    function loadSecect(petSelect) {
+        $.ajax({
+            type: "GET",
+            url: window.pet+"/pet/getPetType",
+            dataType: "json",
+            asyc: false,
+            data: {
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    if (null == id){
+                        petSelect = '<option value="">请选择分类</option>\n';
+                    } else {
+                        petSelect = '<option value="'+typeId+'">'+petSelect+'</option>\n';
+                    }
+                    for (var i = 0; i<data.data.length;i++) {
+                        var opt = '<option value="'+data.data[i].id+'">'+data.data[i].shopping+'</option>';
+                        petSelect += opt;
+                    }
+                    $("#petSelect").html(petSelect);
+                }
+            }
+        });
+    };
+
+    $("#clean").click(function () {
+        $("#imgs").html('');
+    });
+
+    $("#file").change(function () {
+        var formData = new FormData();
+        formData.append('file', $("#file")[0].files[0]);
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/pet/imgUpload",
+            cache: false,
+            dataType: "json",
+            data: formData,
+            processData: false,
+            contentType: false,
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    var img = window.pet + '/myimg/' + data.data;
+                    img = '<img style="width: 80px;height: 80px" src="'+img+'">\n';
+                    $("#imgs").append(img);
+                } else {
+                    alert("data.data.errMsg");
+                }
+            }
+        });
+    });
+
+    $("#addPet").click(function () {
+        //截取图片字符串
+        var imgs = $("img");
+        if (0==imgs.length){
+            alert("请添加图片");
+            return false;
+        }
+        var data = '';
+        for (var i = 0; i < imgs.length; i++) {
+            var petImg = imgs[i].src + (i == imgs.length - 1 ? '' : ',');
+            petImg = petImg.substring(petImg.lastIndexOf("/")+1);
+            data += petImg;
+        }
+        console.log(data);
+
+        if (null != id) {
+            //修改商品信息
+            $.ajax({
+                type: "POST",
+                url: window.pet+"/pet/updatePet",
+                dataType: "json",
+                data: {
+                    "id": id,
+                    "title": $("#title").val(),
+                    "description": $("#description").val(),
+                    "typeId": $("#petSelect").val(),
+                    "price": $("#price").val(),
+                    "primaryPrice": $("#primaryPrice").val(),
+                    "stock": $("#stock").val(),
+                    "imgUrlListStr": data
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        alert("修改成功");
+                    }else {
+                        alert("用户未登录");
+                        window.location.href="登录.html";
+                    }
+                }
+            });
+        }else {
+            //创建商品信息
+            $.ajax({
+                type: "POST",
+                url: window.pet+"/pet/createPet",
+                dataType: "json",
+                data: {
+                    "title": $("#title").val(),
+                    "description": $("#description").val(),
+                    "typeId": $("#petSelect").val(),
+                    "price": $("#price").val(),
+                    "primaryPrice": $("#primaryPrice").val(),
+                    "stock": $("#stock").val(),
+                    "imgUrlListStr": data
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        alert("添加成功");
+                    }else {
+                        alert("用户未登录");
+                        window.location.href="登录.html";
+                    }
+                }
+            });
+        }
+
+    });
+</script>
+</html>

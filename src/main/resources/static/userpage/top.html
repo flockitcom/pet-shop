@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>top</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/zhonglin.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+
+    <!--top 开始-->
+    <div class="top">
+        <div class="top-con w1200">
+            <span>
+                <span class="t-con-l f-l" id="userLogin">您好</span>
+                <span class="t-con-l f-l">，欢迎来到宠物商城</span>
+            </span>
+            <ul class="t-con-r f-r">
+                <li><a href="个人信息.html">我 (个人中心)</a></li>
+                <li><a href="购物车.html">我的购物车</a></li>
+                <li><a href="我的订单.html">我的订单</a></li>
+                <li><a id="exit" style="color: violet" href="javascript:void(0)">【退出】</a></li>
+                <div style="clear:both;"></div>
+            </ul>
+            <div style="clear:both;"></div>
+        </div>
+    </div>
+
+    <!--logo search 开始-->
+    <div class="hd-info1 w1200">
+        <div class="logo f-l">
+            <h1><a href="index.html" title="宠物商城"><img src="images/logo.jpg" /></a></h1>
+        </div>
+        <div class="dianji f-r">
+            <div class="btn1">
+                <button class="btn1-l" id="register">注册</button>
+                <button class="btn1-r" id="login">登录</button>
+                <div style="clear:both;"></div>
+            </div>
+            <button class="btn2" id="adminlogin">管理员入口    ></button>
+        </div>
+        <div class="search f-r">
+            <ul class="sp">
+                <li class="current" ss-search="sp"><a href="JavaScript:;">商品</a></li>
+                <div style="clear:both;"></div>
+            </ul>
+            <div class="srh">
+                <div class="ipt f-l">
+                    <input id="search" type="text" placeholder="搜索商品..." ss-search-show="sp" />
+                </div>
+                <button id="searchBtn" class="f-r">搜 索</button>
+                <div style="clear:both;"></div>
+            </div>
+        </div>
+
+        <div style="clear:both;"></div>
+    </div>
+
+    </div>
+</head>
+<body>
+
+</body>
+<script>
+    var name;
+    var uid = 0;
+
+    function reloadDom() {
+        var dom = '<span style="color:red">'+name+"</span>";
+        $("#userLogin").append($(dom))
+    }
+
+    $("#searchBtn").click(function () {
+        var keyword = $("#search").val();
+        if (keyword == ''){
+            window.location.href="搜索结果.html";
+        } else {
+            window.location.href="搜索结果.html?keyword="+encodeURI(encodeURI(keyword));
+        }
+    });
+
+    $(function () {
+        $.ajax({
+            type: "GET",
+            url: window.pet+"/user/getCurrentUser",
+            dataType: "json",
+            data: {
+                "id": window.localStorage.getItem("uid")
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    name = data.data.name;
+                    reloadDom();
+                }
+            }
+        });
+    });
+
+    $("#exit").on("click", function () {
+        $.ajax({
+            type: "GET",
+            url: window.pet+"/user/exit",
+            dataType: "json",
+            data:{
+                "id": window.localStorage.getItem("uid")
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    alert("退出成功");
+                    window.location.href = "index.html";
+                    // window.location.href = "登录.html";
+                } else {
+                    alert("退出失败,原因为:" + data.data.errMsg);
+                }
+            },
+            error: function (data) {
+                alert("退出失败,原因为:" + data.responseText);
+            }
+        });
+    });
+
+    $("#login").on("click",function () {
+        window.location.href="登录.html"
+    });
+    $("#register").on("click",function () {
+        window.location.href="注册.html"
+    });
+    $("#adminlogin").on("click",function () {
+        window.location.href="../adminpage/登录.html"
+    });
+</script>
+</html>

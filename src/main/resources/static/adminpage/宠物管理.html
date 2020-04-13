@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <title>宠物商城管理系统</title>
+    <link rel="stylesheet" href="layui/css/layui.css"/>
+    <link rel="stylesheet" href="css/admin.css"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="content-search">
+        <form class="layui-form layui-form-pane" action="">
+            <div class="layui-inline">
+                <label class="layui-form-label">商品编号</label>
+                <div class="layui-input-block">
+                    <input id="petId" autocomplete="off" placeholder="请输入编号" class="layui-input" type="text"/>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">商品名称</label>
+                <div class="layui-input-block">
+                    <input id="title" autocomplete="off" placeholder="请输入商品名称" class="layui-input" type="text"/>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">所属分类</label>
+                <div class="layui-input-inline">
+                    <select id="select" lay-verify="">
+
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <input type="button" id="findBtn" class="layui-btn" value="查询">
+            </div>
+        </form>
+    </div>
+
+    <div class="tar mt10">
+        <button onclick="petAdd()" class="layui-btn layui-btn-normal layui-btn-small add" style="top: -200px">+发布商品
+        </button>
+    </div>
+    <div class="table-listm roll-x">
+        <table class="layui-table" lay-skin="line">
+            <thead>
+            <tr>
+                <th colspan="2">宠物名称</th>
+                <th>宠物类型</th>
+                <th>销售价</th>
+                <th>市场价</th>
+                <th>已售数量</th>
+                <th>库存</th>
+                <th>宠物描述</th>
+                <th>浏览次数</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="petTbody">
+
+            </tbody>
+        </table>
+    </div>
+
+    <!--分页-->
+    <div class="paging" id="paging">
+    </div>
+</div>
+<div id="table-pages" style="text-align:center"></div>
+<script type="text/javascript" src="layui/layui.js"></script>
+<script>
+    layui.use(['jquery', 'laydate', 'form', 'layer', 'laypage'], function () {
+        var $$ = layui.jquery,
+            laydate = layui.laydate,
+            layer = layui.layer,
+            laypage = layui.laypage;
+
+
+        // 分页
+        // laypage({
+        //     cont: 'table-pages'
+        //     , pages: 2
+        //     , skip: true
+        // });
+
+        // 开始时间及截止时间
+        var start = {
+            choose: function (datas) {
+                end.min = datas; //开始日选好后，重置结束日的最小日期
+                end.start = datas //将结束日的初始值设定为开始日
+            }
+        };
+
+        var end = {
+            choose: function (datas) {
+                start.max = datas; //结束日选好后，重置开始日的最大日期
+            }
+        };
+
+        $$('#start').click(function () {
+            start.elem = this;
+            laydate(start);
+        });
+
+        $$('#end').click(function () {
+            end.elem = this;
+            laydate(end);
+        });
+
+    });
+
+    var select = '';
+
+    $(function () {
+        load(null, "", 1);
+        loadSecect();
+    });
+
+    //加载下拉框
+    function loadSecect() {
+        $.ajax({
+            type: "GET",
+            url: window.pet + "/pet/getPetType",
+            dataType: "json",
+            data: {},
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    select = '<option value="0">请选择分类</option>\n';
+                    for (var i = 0; i < data.data.length; i++) {
+                        var opt = '<option value="' + data.data[i].id + '">' + data.data[i].shopping + '</option>';
+                        select += opt;
+                    }
+                    $("#select").html(select);
+                }
+            }
+        });
+    };
+
+    $("#findBtn").click(function () {
+        var petId = $("#petId").val();
+        var title = $("#title").val();
+        var typeId = $("#select option:selected").val();　　　　//获取选中项
+        if (petId.length!=0) {
+            $.ajax({
+                type: "POST",
+                url: window.pet + "/pet/getPet",
+                dataType: "json",
+                data: {
+                    "id": petId
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        var img = window.pet + '/myimg/' + data.data.mainimgUrl;
+                        var pet = '<tr>\n' +
+                            '                <td width="66"><a href="javascript:void(0)" class="a3"><img class="img-cp" src="' + img + '" alt=""></a></td>\n' +
+                            '                <td width="300">\n' +
+                            '                    <a href="javascript:void(0)" class="a3">\n' +
+                            '                        <div>' + data.data.title + '</div>\n' +
+                            '                        <div class="gray">&nbsp;</div>\n' +
+                            '                    </a>\n' +
+                            '                </td>\n' +
+                            '                <td>' + data.data.typeStr + '</td>\n' +
+                            '                <td><span class="price">' + data.data.price + '</span></td>\n' +
+                            '                <td>' + '￥' + data.data.primaryPrice + '</td>\n' +
+                            '                <td>' + data.data.sales + '</td>\n' +
+                            '                <td>' + data.data.stock + '</td>\n' +
+                            '                <td>' + data.data.description + '</td>\n' +
+                            '                <td>' + data.data.browse + '</td>\n' +
+                            '                <td>\n' +
+                            '                    <button onclick="editPet(' + data.data.id + ')" class="layui-btn layui-btn-warm layui-btn-small add">编辑</button>\n' +
+                            '                    <button onclick="deletePet(' + data.data.id + ')" class="layui-btn layui-btn-danger layui-btn-small a4">删除</button>\n' +
+                            '                </td>\n' +
+                            '            </tr>';
+                        $("#petTbody").html(pet);
+                        $("#paging").html('');
+                    } else {
+                        alert(data.data.errMsg);
+                    }
+                }
+            });
+        } else {
+            load(typeId, title, 1);
+        }
+    });
+
+    function petAdd() {
+        layer.open({
+            type: 2
+            , area: ['80%', '100%']
+            , title: "发布商品"
+            , content: '发布商品.html'
+        });
+    }
+
+    //编辑商品
+    window.editPet = function (id) {
+        layer.open({
+            type: 2
+            , area: ['80%', '100%']
+            , title: "发布商品"
+            , content: '发布商品.html?id=' + id
+        });
+    };
+
+    //删除商品
+    window.deletePet = function (id) {
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/pet/deletePet",
+            dataType: "json",
+            data: {
+                "id": id
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    alert("商品删除成功.");
+                    window.location.reload()
+                } else {
+                    alert(data.data.errMsg);
+                }
+            }
+        });
+    };
+
+    function load(typeId, keyword, pageNo) {
+        if (0 == typeId) {
+            typeId = null;
+        }
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/pet/getPetByCondition",
+            dataType: "json",
+            data: {
+                "typeId": typeId,
+                "keyword": keyword,
+                "pageNo": pageNo,
+                "pageSize": 5
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    var petTbody = '';
+                    var currentPageSize = data.data.endRow - data.data.startRow + 1;
+                    for (var i = 0; i < currentPageSize; i++) {
+                        var img = window.pet + '/myimg/' + data.data.list[i].mainimgUrl;
+                        var petTr = '<tr>\n' +
+                            '                <td width="66"><a href="javascript:void(0)" class="a3"><img class="img-cp" src="' + img + '" alt=""></a></td>\n' +
+                            '                <td width="300">\n' +
+                            '                    <a href="javascript:void(0)" class="a3">\n' +
+                            '                        <div>' + data.data.list[i].title + '</div>\n' +
+                            '                        <div class="gray">&nbsp;</div>\n' +
+                            '                    </a>\n' +
+                            '                </td>\n' +
+                            '                <td>' + data.data.list[i].typeStr + '</td>\n' +
+                            '                <td><span class="price">' + data.data.list[i].price + '</span></td>\n' +
+                            '                <td>' + '￥' + data.data.list[i].primaryPrice + '</td>\n' +
+                            '                <td>' + data.data.list[i].sales + '</td>\n' +
+                            '                <td>' + data.data.list[i].stock + '</td>\n' +
+                            '                <td>' + data.data.list[i].description + '</td>\n' +
+                            '                <td>' + data.data.list[i].browse + '</td>\n' +
+                            '                <td>\n' +
+                            '                    <button onclick="editPet(' + data.data.list[i].id + ')" class="layui-btn layui-btn-warm layui-btn-small add">编辑</button>\n' +
+                            '                    <button onclick="deletePet(' + data.data.list[i].id + ')" class="layui-btn layui-btn-danger layui-btn-small a4">删除</button>\n' +
+                            '                </td>\n' +
+                            '            </tr>';
+                        petTbody += petTr;
+                    }
+                    $("#petTbody").html(petTbody);
+
+                    //分页栏
+                    var paging = '';
+                    var paging01 = '<div class="pag-left f-l" style="width: 600px">\n' +
+                        '                        <a onclick="load(' + typeId + ',' + '&quot;' + keyword + '&quot;' + ',' + '1' + ')" href="javascript:void(0)"  class="about left-r f-l"  style="width: 50px">首页</a>\n' +
+                        '                        <p class="about left-r f-l" style="width: 50px;background: white">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n';
+                    paging += paging01;
+                    if (data.data.hasPreviousPage) {
+                        var beforeNum = '<a onclick="load(' + typeId + ',' + '&quot;' + keyword + '&quot;' + ',' + data.data.prePage + ')" href="javascript:void(0)" class="about left-r f-l"><</a>\n';
+                        paging += beforeNum;
+                    }
+
+                    var paging02 = '<ul class="left-m f-l">\n';
+                    paging += paging02;
+
+
+                    var begin;
+                    var end;
+                    if (data.data.pages < 8) {
+                        begin = 1;
+                        end = data.data.pages;
+                    } else {
+                        //1总页面超过8页
+                        begin = data.data.pageNum - 4;
+                        end = data.data.pageNum + 3;
+
+                        // 2前面不够4页
+                        if (begin < 1) {
+                            begin = 1;
+                            end = begin + 7;
+                        }
+
+                        // 3后面不总3页
+                        if (end > data.data.pages) {
+                            end = data.data.pages;
+                            begin = end - 7;
+                        }
+                    }
+
+                    for (var i = begin; i <= end; i++) {
+                        var li;
+                        if (data.data.pageNum == i) {
+                            li = '<li onclick="load(' + typeId + ',' + '&quot;' + keyword + '&quot;' + ',' + i + ')" class="current"><a href="javascript:void(0)">' + i + '</a></li>';
+                        } else {
+                            li = '<li onclick="load(' + typeId + ',' + '&quot;' + keyword + '&quot;' + ',' + i + ')"><a href="javascript:void(0)">' + i + '</a></li>';
+                        }
+                        paging += li;
+                    }
+
+                    var paging03 = '<div style="clear:both;"></div>\n' +
+                        '                        </ul>\n';
+                    paging += paging03;
+                    if (data.data.hasNextPage) {
+                        var nextNum = '<a onclick="load(' + typeId + ',' + '&quot;' + keyword + '&quot;' + ',' + data.data.nextPage + ')" href="javascript:void(0)" class="about left-l f-l">></a>';
+                        paging += nextNum;
+                    }
+                    paging += '                        <p class="about left-r f-l" style="width: 50px;background: white">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n';
+                    var lastNum = '<a onclick="load(' + typeId + ',' + '&quot;' + keyword + '&quot;' + ',' + data.data.pages + ')" href="javascript:void(0)" class="about left-r f-l" style="width: 50px">末页</a>';
+                    paging += lastNum;
+                    var paging04 = '                        <div style="clear:both;"></div>\n' +
+                        '                    </div>\n' +
+                        '                    <div style="clear:both;"></div>';
+                    paging += paging04;
+                    $("#paging").html(paging);
+                    //url跟新
+                    // pushState(typeId,keyword,pageNo);
+                    //定位页面至顶部
+                    window.scrollTo(0, 0);
+                }
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

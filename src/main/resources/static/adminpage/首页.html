@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <title>宠物商店管理系统</title>
+    <link rel="stylesheet" href="layui/css/layui.css"/>
+    <link rel="stylesheet" href="css/admin.css"/>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+<body>
+    <!-- 布局容器 -->
+    <div class="layui-layout layui-layout-admin">
+        <!-- 头部 -->
+        <div class="layui-header">
+            <div class="layui-main">
+				<div class="top-left">
+					<!-- logo -->
+					<a href="javascript:;" class="logo">宠物商店管理系统</a>
+					<a href="javascript:;" class="menu-flexible ml10">
+						<i class="layui-icon">&#xe635;</i> 
+					</a>
+				</div>
+                <!-- 头部右侧操作 -->
+                <ul class="layui-nav operate">
+                    <li class="layui-nav-item"> 
+                        <!-- 进入商城首页    -->
+                        <a href="../userpage/index.html">宠物商城首页</a>
+                    </li>
+                    <li class="layui-nav-item"> 
+                        <!-- 进入移动端首页    -->
+                        <a href="javascript:;" class="wap">宠物商城WAP</a>
+                        <dl class="layui-nav-child">
+                            <dd class="p10">
+                                <img src="img/pic.png" width="150px" height="150px" alt="">
+                                <p class="tac" style="color:#333;">扫一扫进入宠物商城WAP</p>
+                            </dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;" id="top_main"> </a>
+                        <dl class="layui-nav-child">
+                            <dd>
+                            	<a href="javascript:;" class="edit-password">修改密码</a>
+                            </dd>
+                            <dd>
+                                <a id="exit">退出登录</a>
+                            </dd>
+                        </dl>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 左侧菜单 -->
+        <div class="layui-side layui-bg-black left-menu-all ">
+            <div class="layui-side-scroll">
+            	<ul class="layui-nav layui-nav-tree left-menu" lay-filter="left-menu">
+                    <li class="layui-nav-item layui-this">
+                        <a href="javascript:;" data-url="引导页.html" data-id="1">后台首页</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">商品管理</a>
+                        <dl class="layui-nav-child">
+                            <dd>
+                                <a href="javascript:;" data-url="宠物管理.html" data-id="2">宠物管理</a>
+                            </dd>
+                            <dd>
+                                <a href="javascript:;" data-url="宠物类型管理.html" data-id="3">宠物类型管理</a>
+                            </dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">订单管理</a>
+                        <dl class="layui-nav-child">
+                            <dd>
+                                <a href="javascript:;" data-url="待发货.html" data-id="4">待发货</a>
+                            </dd>
+                            <dd>
+                                <a href="javascript:;" data-url="待签收.html" data-id="5">待签收</a>
+                            </dd>
+                            <dd>
+                                <a href="javascript:;" data-url="订单列表.html" data-id="6">订单列表</a>
+                            </dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">用户管理</a>
+                        <dl class="layui-nav-child">
+                            <dd>
+                                <a href="javascript:;" data-url="用户账号.html" data-id="7">用户账号</a>
+                            </dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">管理员管理</a>
+                        <dl class="layui-nav-child">
+                            <dd>
+                                <a href="javascript:;" data-url="管理员账号.html" data-id="8">管理员账号</a>
+                            </dd>
+                        </dl>
+                    </li>
+                </ul>
+            </div>
+        </div>
+		
+        <!-- 主体 -->
+        <div class="layui-body">
+            <!-- 顶部切换卡 -->
+            <div class="layui-tab layui-tab-card" lay-filter="top-tab" lay-allowClose="true">
+                <ul class="layui-tab-title"></ul>
+                <div class="layui-tab-button">
+                	<a href="javascript:;"><i class="layui-icon">&#x1002;</i></a>
+                </div>
+                <div class="layui-tab-content"></div>
+            </div>
+        </div>
+
+        <!-- 底部 -->
+        <div class="layui-footer">
+             宠物商店管理系统 <span class="red">*建议使用分辨率1366*768以上及高级浏览器，体验效果更佳！</span>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="layui/layui.js"></script>
+    <script type="text/javascript" src="js/admin.js"></script>
+    <script>
+        layui.use(['jquery','form','layer'], function(){
+            var $ = layui.jquery,
+                layer = layui.layer,
+                laypage = layui.laypage;
+
+            // 修改密码
+            $(document).on("click", ".edit-password", function() {
+                layer.open({
+                  type:2
+                  ,area:['450px', '320px']
+                  ,title:"修改密码"
+                  ,content: '修改密码.html'
+                });
+            });
+        });
+
+        $(function () {
+            $.ajax({
+                type: "Post",
+                url: window.pet+"/admin/getCurrentAdmin",
+                dataType: "json",
+                data:{
+                    "id": window.localStorage.getItem("aid")
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        $("#top_main").html(data.data.name);
+                    }else {
+                        alert("用户未登录");
+                        window.location.href="登录.html";
+                    }
+                }
+            });
+
+            $("#exit").on("click", function () {
+                $.ajax({
+                    type: "GET",
+                    url: window.pet+"/admin/exit",
+                    dataType: "json",
+                    data:{
+                        "id": window.localStorage.getItem("aid")
+                    },
+                    xhrFields: {withCredentials: true},
+                    success: function (data) {
+                        if (data.status == "success") {
+                            alert("退出成功");
+                            top.location.href = "登录.html";
+                            // window.location.href = "login.html";
+                        } else {
+                            alert("退出失败,原因为" + data.data.errMsg);
+                        }
+                    },
+                    error: function (data) {
+                        alert("退出失败,原因为" + data.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+
+
+</body>
+</html>

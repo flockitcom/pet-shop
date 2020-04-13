@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <title>宠物商店管理系统</title>
+    <link rel="stylesheet" href="layui/css/layui.css"/>
+    <link rel="stylesheet" href="css/admin.css"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="content-search">
+        <form class="layui-form layui-form-pane" action="">
+            <div class="layui-inline">
+                <label class="layui-form-label">订单编号</label>
+                <div class="layui-input-block">
+                    <input id="orderNo" name="date" placeholder="请输入订单编号" autocomplete="off" class="layui-input"
+                           type="text"/>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">用户邮箱</label>
+                <div class="layui-input-block">
+                    <input id="email" name="date" placeholder="请输入用户邮箱" autocomplete="off" class="layui-input"
+                           type="text"/>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">开始时间</label>
+                <div class="layui-input-inline">
+                    <input class="layui-input layui-date" placeholder="开始时间" id="start">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">截止时间</label>
+                <div class="layui-input-inline">
+                    <input class="layui-input layui-date" placeholder="结束时间" id="end">
+                </div>
+            </div>
+            <div class="layui-inline"><input type="button" id="selectBtn" class="layui-btn" value="查询"></div>
+        </form>
+    </div>
+
+    <div class="table-list roll-x">
+        <table class="layui-table" lay-skin="line">
+            <thead>
+            <tr>
+                <th>订单编号</th>
+                <th>商品名称</th>
+                <th>商品单价</th>
+                <th>商品数量</th>
+                <th>成交金额</th>
+                <th>用户ID</th>
+                <th>用户账号</th>
+                <th>用户邮箱</th>
+                <th>订单状态</th>
+                <th>交易时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="orderTbody">
+
+            </tbody>
+        </table>
+    </div>
+
+    <!--分页-->
+    <div class="paging" id="paging">
+    </div>
+</div>
+<div id="table-pages" style="text-align:center"></div>
+<script type="text/javascript" src="layui/layui.js"></script>
+<script>
+    layui.use(['jquery', 'laydate', 'form', 'layer', 'laypage'], function () {
+        var $$ = layui.jquery,
+            laydate = layui.laydate,
+            layer = layui.layer,
+            laypage = layui.laypage;
+
+        // 分页
+        laypage({
+            cont: 'table-pages'
+            , pages: 0
+            , skip: true
+        });
+
+        // 开始时间及截止时间
+        var start = {
+            choose: function (datas) {
+                end.min = datas; //开始日选好后，重置结束日的最小日期
+                end.start = datas //将结束日的初始值设定为开始日
+            }
+        };
+
+        var end = {
+            choose: function (datas) {
+                start.max = datas; //结束日选好后，重置开始日的最大日期
+            }
+        };
+
+        $$('#start').click(function () {
+            start.elem = this;
+            laydate(start);
+        });
+
+        $$('#end').click(function () {
+            end.elem = this;
+            laydate(end);
+        });
+
+        // 订单详情
+        window.orderDetail = function (id) {
+            layer.open({
+                type: 2
+                , area: ['80%', '90%']
+                , title: "订单详情"
+                , content: '订单详情.html?orderNo=' + id
+            });
+        };
+
+        //删除订单
+        window.deleteOrder = function (orderNo) {
+            $.ajax({
+                type: "POST",
+                url: window.pet + "/order/deleteOrder",
+                dataType: "json",
+                data: {
+                    "orderNo": orderNo
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        alert("订单删除成功");
+                        window.location.reload()
+                    } else {
+                        alert(data.data.errMsg);
+                    }
+                }
+            });
+        };
+
+    });
+
+    $(function () {
+        load(1, '', '', '', '');
+    });
+
+    var orderNo = '';
+    var email = '';
+    var start = '';
+    var end = '';
+
+    $("#selectBtn").click(function () {
+        orderNo = $("#orderNo").val();
+        email = $("#email").val();
+        start = $("#start").val();
+        end = $("#end").val();
+        load(1, orderNo, email, start, end);
+    });
+
+    window.load = function (pageNo, orderNo, email, start, end) {
+        //不知道为什么，end默认为2
+        if ('2' == end){
+            end = '';
+        }
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/order/findOrderByCondition",
+            dataType: "json",
+            data: {
+                "adminId": window.localStorage.getItem("aid"),
+                "pageNo": pageNo,
+                "status": 5,
+                "orderNo": orderNo,
+                "email": email,
+                "start": start,
+                "end": end
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    var orderTbody = '';
+                    var currentPageSize = data.data.endRow - data.data.startRow + 1;
+                    for (var i = 0; i < currentPageSize; i++) {
+                        var orderTr = '<tr>\n' +
+                            '                <td><a onclick="orderDetail(' + data.data.list[i].orderNo + ')" class="a1">' + data.data.list[i].orderNo + '</a></td>\n' +
+                            '                <td>' + data.data.list[i].petDo.title + '</td>\n' +
+                            '                <td><span class="price">' + data.data.list[i].petPrice + '</span></td>\n' +
+                            '                <td>' + data.data.list[i].amount + '</td>\n' +
+                            '                <td><span class="price">' + data.data.list[i].orderPrice + '</span></td>\n' +
+                            '                <td><a href="javascript:;" class="a2">' + data.data.list[i].userId + '</a></td>\n' +
+                            '                <td>' + data.data.list[i].userDo.name + '</td>\n' +
+                            '                <td>' + data.data.list[i].userDo.email + '</td>\n' +
+                            '                <td><span>已完成</span></td>\n' +
+                            '                <td>' + data.data.list[i].timeStr + '</td>\n' +
+                            '                <td>\n' +
+                            '                    <button onclick="deleteOrder('+data.data.list[i].orderNo+')" class="layui-btn layui-btn-danger layui-btn-small a4">删除订单</button>\n' +
+                            '                </td>\n' +
+                            '            </tr>';
+                        orderTbody += orderTr;
+                    }
+                    $("#orderTbody").html(orderTbody);
+                    // form.render();
+
+                    //分页栏
+                    var paging = '';
+                    var paging01 = '<div class="pag-left f-l" style="width: 600px">\n' +
+                        '                        <a onclick="load(' + '1' + ',' + '&quot;' + orderNo + '&quot;' + ',' + '&quot;' + email + '&quot;' + ',' + '&quot;' + start + '&quot;' + ',' + '&quot;' + end + '&quot;' + ')" href="javascript:void(0)"  class="about left-r f-l"  style="width: 50px">首页</a>\n' +
+                        '                        <p class="about left-r f-l" style="width: 50px;background: white">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n';
+                    paging += paging01;
+                    if (data.data.hasPreviousPage) {
+                        var beforeNum = '<a onclick="load(' + data.data.prePage + ',' + '&quot;' + orderNo + '&quot;' + ',' + '&quot;' + email + '&quot;' + ',' + '&quot;' + start + '&quot;' + ',' + '&quot;' + end + '&quot;' + ')" href="javascript:void(0)" class="about left-r f-l"><</a>\n';
+                        paging += beforeNum;
+                    }
+
+                    var paging02 = '<ul class="left-m f-l">\n';
+                    paging += paging02;
+
+
+                    var begin;
+                    var end;
+                    if (data.data.pages < 8) {
+                        begin = 1;
+                        end = data.data.pages;
+                    } else {
+                        //1总页面超过8页
+                        begin = data.data.pageNum - 4;
+                        end = data.data.pageNum + 3;
+
+                        // 2前面不够4页
+                        if (begin < 1) {
+                            begin = 1;
+                            end = begin + 7;
+                        }
+
+                        // 3后面不总3页
+                        if (end > data.data.pages) {
+                            end = data.data.pages;
+                            begin = end - 7;
+                        }
+                    }
+
+                    for (var i = begin; i <= end; i++) {
+                        var li;
+                        if (data.data.pageNum == i) {
+                            li = '<li onclick="load(' + i + ',' + '&quot;' + orderNo + '&quot;' + ',' + '&quot;' + email + '&quot;' + ',' + '&quot;' + start + '&quot;' + ',' + '&quot;' + end + '&quot;' + ')" class="current"><a href="javascript:void(0)">' + i + '</a></li>';
+                        } else {
+                            li = '<li onclick="load(' + i + ',' + '&quot;' + orderNo + '&quot;' + ',' + '&quot;' + email + '&quot;' + ',' + '&quot;' + start + '&quot;' + ',' + '&quot;' + end + '&quot;' + ')"><a href="javascript:void(0)">' + i + '</a></li>';
+                        }
+                        paging += li;
+                    }
+
+                    var paging03 = '<div style="clear:both;"></div>\n' +
+                        '                        </ul>\n';
+                    paging += paging03;
+                    if (data.data.hasNextPage) {
+                        var nextNum = '<a onclick="load(' + data.data.nextPage + ',' + '&quot;' + orderNo + '&quot;' + ',' + '&quot;' + email + '&quot;' + ',' + '&quot;' + start + '&quot;' + ',' + '&quot;' + end + '&quot;' + ')" href="javascript:void(0)" class="about left-l f-l">></a>';
+                        paging += nextNum;
+                    }
+                    paging += '                        <p class="about left-r f-l" style="width: 50px;background: white">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n';
+                    var lastNum = '<a onclick="load(' + data.data.pages + ',' + '&quot;' + orderNo + '&quot;' + ',' + '&quot;' + email + '&quot;' + ',' + '&quot;' + start + '&quot;' + ',' + '&quot;' + end + '&quot;' + ')" href="javascript:void(0)" class="about left-r f-l" style="width: 50px">末页</a>';
+                    paging += lastNum;
+                    var paging04 = '                        <div style="clear:both;"></div>\n' +
+                        '                    </div>\n' +
+                        '                    <div style="clear:both;"></div>';
+                    paging += paging04;
+                    $("#paging").html(paging);
+                    //url跟新
+                    // window.history.pushState("page",null,"管理员账号.html?pageNo="+pageNo);
+                    //定位页面至顶部
+                    window.scrollTo(0, 0);
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

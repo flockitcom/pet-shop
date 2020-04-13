@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <title>宠物商店管理系统</title>
+    <link rel="stylesheet" href="layui/css/layui.css"/>
+    <link rel="stylesheet" href="css/admin.css"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+<body>
+
+<fieldset class="layui-elem-field site-demo-button">
+    <legend>订单信息</legend>
+    <table class="layui-table layui-table-add" lay-skin="nob">
+        <tbody>
+        <tr>
+            <th width="100" class="pad">订单编号</th>
+            <td id="orderNo"></td>
+        </tr>
+        <tr>
+            <th class="pad">商品名</th>
+            <td id="pet"></td>
+        </tr>
+        <tr>
+            <th class="pad">商品类型</th>
+            <td id="type"></td>
+        </tr>
+        <tr>
+            <th class="pad">订单状态</th>
+            <td id="status"></td>
+        </tr>
+        <tr>
+            <th class="pad">交易时间</th>
+            <td id="date"></td>
+        </tr>
+        </tbody>
+    </table>
+</fieldset>
+
+<fieldset class="layui-elem-field site-demo-button">
+    <legend>会员信息</legend>
+    <table class="layui-table layui-table-add" lay-skin="nob">
+        <tbody>
+        <tr>
+            <th width="100" class="pad">会员ID</th>
+            <td id="userId"></td>
+        </tr>
+        <tr>
+            <th class="pad">会员姓名</th>
+            <td id="name"></td>
+        </tr>
+        <tr>
+            <th class="pad">邮箱</th>
+            <td id="email"></td>
+        </tr>
+        </tbody>
+    </table>
+</fieldset>
+
+<fieldset class="layui-elem-field site-demo-button">
+    <legend>收货地址</legend>
+    <table class="layui-table layui-table-add" lay-skin="nob">
+        <tbody>
+        <tr>
+            <th width="100" class="pad">收货人</th>
+            <td id="receipt"></td>
+        </tr>
+        <tr>
+            <th class="pad">手机号码</th>
+            <td id="telphone"></td>
+        </tr>
+        <tr>
+            <th class="pad">收货地址</th>
+            <td id="address"></td>
+        </tr>
+        </tbody>
+    </table>
+</fieldset>
+
+<fieldset class="layui-elem-field layui-field-title mtb10">
+    <legend>商品信息</legend>
+</fieldset>
+<table class="layui-table" lay-skin="line">
+    <thead>
+    <tr>
+        <th colspan="2">商品名称</th>
+        <th>所属品牌</th>
+        <th>数量</th>
+        <th>商品单价</th>
+        <th>商品总价</th>
+        <th>成交金额</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <!-- 点击进入前台对应商品页面 -->
+        <td width="66" class="a3"><a href="" target="blank"><img id="img" class="img-cp" src="img/1.jpg" alt=""></a></td>
+        <td width="300" class="a3">
+            <a href="">
+                <div id="title"></div>
+                <div id="desc" style="color: black"></div>
+            </a>
+        </td>
+        <td id="typePet"></td>
+        <td id="amount"></td>
+        <td><span class="price" id="price"></span></td>
+        <td><span class="price" id="total"></span></td>
+        <td id="successOrder"></td>
+    </tr>
+    </tbody>
+</table>
+
+<fieldset class="layui-elem-field site-demo-button">
+    <legend>其它信息</legend>
+    <table class="layui-table layui-table-add" lay-skin="nob">
+        <tbody>
+        <tr>
+            <th width="100" class="pad">备注</th>
+            <td>无</td>
+        </tr>
+        </tbody>
+    </table>
+</fieldset>
+
+<script type="text/javascript" src="layui/layui.js"></script>
+<script>
+    layui.use(['jquery', 'form'], function () {
+        var $$ = layui.jquery;
+    });
+
+    var typeId = 0;
+
+    $(function () {
+        orderNo = GetQueryString("orderNo");
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/order/findOrderByCondition",
+            dataType: "json",
+            asyc: false,
+            data: {
+                "adminId": window.localStorage.getItem("aid"),
+                "orderNo": orderNo
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    typeId = data.data.list[0].petDo.typeId;
+                    $("#orderNo").html(data.data.list[0].orderNo);
+                    $("#pet").html(data.data.list[0].petDo.title);
+                    var status;
+                    if ("2"==data.data.list[0].status) {
+                        status = "代发货";
+                    }
+                    if ("3"==data.data.list[0].status) {
+                        status = "待签收";
+                    }
+                    if ("5"==data.data.list[0].status) {
+                        status = "已完成";
+                    }
+                    $("#status").html(status);
+                    $("#date").html(data.data.list[0].timeStr);
+                    $("#userId").html(data.data.list[0].userId);
+                    $("#name").html(data.data.list[0].userDo.name);
+                    $("#email").html(data.data.list[0].userDo.email);
+                    $("#receipt").html(data.data.list[0].userDo.name);
+                    $("#telphone").html(data.data.list[0].userDo.telphone);
+                    $("#address").html(data.data.list[0].userDo.address);
+                    $("#img").attr("src",window.pet+'/myimg/'+data.data.list[0].petDo.mainimgUrl)
+                    $("#title").html(data.data.list[0].petDo.title);
+                    $("#desc").html(data.data.list[0].petDo.description);
+                    $("#amount").html(data.data.list[0].amount);
+                    $("#price").html(data.data.list[0].petPrice);
+                    $("#total").html(data.data.list[0].orderPrice);
+                    $("#successOrder").html(data.data.list[0].orderPrice);
+
+                    $.ajax({
+                        type: "POST",
+                        url: window.pet+"/pet/getPetTypeById",
+                        dataType: "json",
+                        asyc: false,
+                        data: {
+                            "id": typeId
+                        },
+                        xhrFields: {withCredentials: true},
+                        success: function (data) {
+                            if (data.status == "success") {
+                                $("#type").html(data.data.shopping);
+                                $("#typePet").html(data.data.shopping);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
+    });
+
+</script>
+</body>
+</html>

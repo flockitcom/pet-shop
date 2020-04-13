@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <title>宠物商店管理系统</title>
+    <link rel="stylesheet" href="layui/css/layui.css"/>
+    <link rel="stylesheet" href="css/admin.css"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="content-search">
+        <form class="layui-form layui-form-pane" action="">
+            <div class="layui-inline">
+                <label class="layui-form-label">用户ID</label>
+                <div class="layui-input-block">
+                    <input id="userId" name="date" placeholder="请输入用户ID" autocomplete="off" class="layui-input" type="text"/>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">用户账号</label>
+                <div class="layui-input-block">
+                    <input id="name" value="" name="date" placeholder="请输入用户账号" autocomplete="off" class="layui-input" type="text"/>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">邮箱</label>
+                <div class="layui-input-block">
+                    <input id="email" name="date" placeholder="请输入邮箱" autocomplete="off" class="layui-input" type="text"/>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <input type="button" class="layui-btn" id="selectBtn" value="查询">
+            </div>
+        </form>
+    </div>
+
+    <div class="table-list layui-form roll-x">
+        <table class="layui-table" lay-skin="line">
+            <thead>
+            <tr>
+                <th>用户ID</th>
+                <th>用户账号</th>
+                <th style="width: 200px;text-align: center">邮箱</th>
+                <th>性别</th>
+                <th>年龄</th>
+                <th style="width: 220px;text-align: center">地址</th>
+                <th>手机</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="userTbody">
+
+            </tbody>
+        </table>
+    </div>
+
+    <!--分页-->
+    <div class="paging" id="paging">
+
+    </div>
+</div>
+<div id="table-pages" style="text-align:center"></div>
+<script type="text/javascript" src="layui/layui.js"></script>
+<script>
+    layui.use(['jquery', 'laydate', 'form', 'layer', 'laypage'], function () {
+        var $$ = layui.jquery,
+            laydate = layui.laydate,
+            layer = layui.layer,
+            laypage = layui.laypage;
+        //
+        // // 分页
+        //  laypage({
+        //     cont: 'table-pages'
+        //     ,pages: 100
+        //     ,skip: true
+        //   });
+
+        // 开始时间及截止时间
+        var start = {
+            choose: function (datas) {
+                end.min = datas; //开始日选好后，重置结束日的最小日期
+                end.start = datas //将结束日的初始值设定为开始日
+            }
+        };
+
+        var end = {
+            choose: function (datas) {
+                start.max = datas; //结束日选好后，重置开始日的最大日期
+            }
+        };
+
+        $$('#start').click(function () {
+            start.elem = this;
+            laydate(start);
+        });
+
+        $$('#end').click(function () {
+            end.elem = this;
+            laydate(end);
+        });
+
+
+        // 会员详情
+        $$(document).on("click", ".a2", function () {
+            layer.open({
+                type: 2
+                , area: ['50%', '70%']
+                , title: "会员详情"
+                , content: '会员详情.html'
+            });
+        });
+
+
+        // 账户流水
+        $$(document).on("click", ".a3", function () {
+            layer.open({
+                type: 2
+                , area: ['70%', '70%']
+                , title: "账户流水"
+                , content: '账户流水.html'
+            });
+        });
+
+        //删除用户
+        window.userDelete = function(uid) {
+            $.ajax({
+                type: "POST",
+                url: window.pet + "/admin/deleteUser",
+                dataType: "json",
+                data: {
+                    "currentId": window.localStorage.getItem("aid"),
+                    "uid": uid
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        alert("用户删除成功.");
+                        window.location.reload()
+                    } else {
+                        alert(data.data.errMsg);
+                    }
+                }
+            });
+        };
+    });
+
+    $(function () {
+        load(1);
+    });
+
+    $("#selectBtn").click(function () {
+        var userId = $("#userId").val();
+        var name = $("#name").val();
+        var email = $("#email").val();
+        if (''==userId && ''== name && ''== email){
+            load(1);
+        } else {
+            $.ajax({
+                type: "GET",
+                url: window.pet + "/user/findUserByCondition",
+                dataType: "json",
+                data: {
+                    "adminId": window.localStorage.getItem("aid"),
+                    "userId": userId,
+                    "name": name,
+                    "email": email
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        var gender = '';
+                        if ("2" == data.data.gender) {
+                            gender = "女";
+                        } else {
+                            gender = "男";
+                        }
+                        var userTr = '<tr>\n' +
+                            '                <td>'+data.data.id+'</td>\n' +
+                            '                <td>'+data.data.name+'</td>\n' +
+                            '                <td style="width: 200px;text-align: center">'+data.data.email+'</td>\n' +
+                            '                <td>'+gender+'</td>\n' +
+                            '                <td>'+data.data.age+'</td>\n' +
+                            '                <td style="width: 220px;text-align: center">'+data.data.address+'</td>\n' +
+                            '                <td>'+data.data.telphone+'</td>\n' +
+                            '                <td>\n' +
+                            '                    <button onclick="userDelete('+data.data.id+')" class="layui-btn layui-btn-normal layui-btn-small add">删除</button>\n' +
+                            '                </td>\n' +
+                            '            </tr>';
+                        $("#userTbody").html(userTr);
+                        // form.render();
+                        $("#paging").html('');
+                    }
+                }
+            });
+        }
+    });
+
+    window.load = function (pageNo) {
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/admin/getUserList",
+            dataType: "json",
+            data: {
+                "id": window.localStorage.getItem("aid"),
+                "pageNo": pageNo
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    var userTdoby = '';
+                    var currentPageSize = data.data.endRow - data.data.startRow + 1;
+                    for (var i = 0; i < currentPageSize; i++) {
+                        var gender = '';
+                        if ("2" == data.data.list[i].gender) {
+                            gender = "女";
+                        } else {
+                            gender = "男";
+                        }
+
+
+                        var userTr = '<tr>\n' +
+                            '                <td>'+data.data.list[i].id+'</td>\n' +
+                            '                <td>'+data.data.list[i].name+'</td>\n' +
+                            '                <td style="width: 200px;text-align: center">'+data.data.list[i].email+'</td>\n' +
+                            '                <td>'+gender+'</td>\n' +
+                            '                <td>'+data.data.list[i].age+'</td>\n' +
+                            '                <td style="width: 220px;text-align: center">'+data.data.list[i].address+'</td>\n' +
+                            '                <td>'+data.data.list[i].telphone+'</td>\n' +
+                            '                <td>\n' +
+                            '                    <button onclick="userDelete('+data.data.list[i].id+')" class="layui-btn layui-btn-normal layui-btn-small add">删除</button>\n' +
+                            '                </td>\n' +
+                            '            </tr>';
+                        userTdoby += userTr;
+                    }
+                    $("#userTbody").html(userTdoby);
+                    // form.render();
+
+                    //分页栏
+                    var paging = '';
+                    var paging01 = '<div class="pag-left f-l" style="width: 600px">\n' +
+                        '                        <a onclick="load(' + '1' + ')" href="javascript:void(0)"  class="about left-r f-l"  style="width: 50px">首页</a>\n' +
+                        '                        <p class="about left-r f-l" style="width: 50px;background: white">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n';
+                    paging += paging01;
+                    if (data.data.hasPreviousPage) {
+                        var beforeNum = '<a onclick="load(' + data.data.prePage + ')" href="javascript:void(0)" class="about left-r f-l"><</a>\n';
+                        paging += beforeNum;
+                    }
+
+                    var paging02 = '<ul class="left-m f-l">\n';
+                    paging += paging02;
+
+
+                    var begin;
+                    var end;
+                    if (data.data.pages < 8) {
+                        begin = 1;
+                        end = data.data.pages;
+                    } else {
+                        //1总页面超过8页
+                        begin = data.data.pageNum - 4;
+                        end = data.data.pageNum + 3;
+
+                        // 2前面不够4页
+                        if (begin < 1) {
+                            begin = 1;
+                            end = begin + 7;
+                        }
+
+                        // 3后面不总3页
+                        if (end > data.data.pages) {
+                            end = data.data.pages;
+                            begin = end - 7;
+                        }
+                    }
+
+                    for (var i = begin; i <= end; i++) {
+                        var li;
+                        if (data.data.pageNum == i) {
+                            li = '<li onclick="load(' + i + ')" class="current"><a href="javascript:void(0)">' + i + '</a></li>';
+                        } else {
+                            li = '<li onclick="load(' + i + ')"><a href="javascript:void(0)">' + i + '</a></li>';
+                        }
+                        paging += li;
+                    }
+
+                    var paging03 = '<div style="clear:both;"></div>\n' +
+                        '                        </ul>\n';
+                    paging += paging03;
+                    if (data.data.hasNextPage) {
+                        var nextNum = '<a onclick="load(' + data.data.nextPage + ')" href="javascript:void(0)" class="about left-l f-l">></a>';
+                        paging += nextNum;
+                    }
+                    paging += '                        <p class="about left-r f-l" style="width: 50px;background: white">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n';
+                    var lastNum = '<a onclick="load(' + data.data.pages + ')" href="javascript:void(0)" class="about left-r f-l" style="width: 50px">末页</a>';
+                    paging += lastNum;
+                    var paging04 = '                        <div style="clear:both;"></div>\n' +
+                        '                    </div>\n' +
+                        '                    <div style="clear:both;"></div>';
+                    paging += paging04;
+                    $("#paging").html(paging);
+                    //url跟新
+                    // window.history.pushState("page",null,"管理员账号.html?pageNo="+pageNo);
+                    //定位页面至顶部
+                    window.scrollTo(0, 0);
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>nav</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/zhonglin.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+<body>
+<!--nav 开始-->
+<div class="nav w1200">
+    <a href="JavaScript:;" class="sp-kj" kj="">
+        商品分类快捷
+
+    </a>
+    <ul id="navType">
+        <div style="clear:both;"></div>
+    </ul>
+    <div style="clear:both;"></div>
+</div>
+</body>
+<script>
+    $(function () {
+        $.ajax({
+            type: "GET",
+            url: window.pet+"/pet/getPetType",
+            dataType: "json",
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    var navType='';
+                    var k=0;
+                    if (data.data.length<=7){
+                        k=data.data.length;
+                    } else {
+                        k = 7;
+                    }
+                    for (var i = 0 ; i<k;i++){
+                        var nav = '<li><a href="搜索结果.html?typeId='+data.data[i].id+'">'+data.data[i].shopping+'</a></li>';
+                        navType += nav;
+                    }
+                    var navall = '<li><a href="搜索结果.html">'+"所有宠物"+'</a></li>';
+                    navType += navall;
+                    $("#navType").html(navType);
+
+                }
+            }
+        });
+    });
+</script>
+</html>

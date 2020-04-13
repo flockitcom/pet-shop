@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <title>宠物商店管理系统</title>
+    <link rel="stylesheet" href="layui/css/layui.css"/>
+    <link rel="stylesheet" href="css/admin.css"/>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+<body>
+
+<div>
+	    <table class="layui-table layui-table-add" lay-skin="nob">
+		  <tbody>
+		    <tr>
+		      <th width="100">旧密码</th>
+		      <td>
+		        <div style="width: 240px">
+		      		<input type="text" id="pwdOld" placeholder="请输入旧密码" autocomplete="off" class="layui-input">
+		        </div>
+		      </td>
+		    </tr>
+		    <tr>
+		      <th>新密码</th>
+		      <td>
+		        <div style="width: 240px">
+		        	<input type="text" id="pwdNew" placeholder="请输入新密码" maxlength="11" autocomplete="off" class="layui-input">
+		        </div>
+		      </td>
+		    </tr>
+		    <tr>
+		      <th>确认密码</th>
+		      <td>
+		        <div style="width: 240px">
+		        	<input type="text" id="pwdNewTwo" placeholder="请输入新密码" maxlength="11" autocomplete="off" class="layui-input">
+		        </div>
+		      </td>
+		    </tr>
+		  </tbody>
+		</table>
+		<div style="margin-left: 145px; margin-bottom: 15px;">	
+			<button onclick="updatePwd()" class="layui-btn" style=" min-width: 150px;">确 定</button>
+		</div>
+	</div>
+	<script type="text/javascript" src="layui/layui.js"></script>
+
+</body>
+<script>
+	function updatePwd() {
+		var pwdNew = $("#pwdNew").val();
+		var pwdNewTwo = $("#pwdNewTwo").val();
+		if (pwdNew != pwdNewTwo) {
+			alert("两次密码不相同");
+			return false;
+		}
+		$.ajax({
+			type: "POST",
+			url: window.pet + "/admin/updatePassword",
+			dataType: "json",
+			data: {
+				"id": window.localStorage.getItem("aid"),
+				"password": $("#pwdOld").val(),
+				"newPassword": $("#pwdNew").val()
+			},
+			xhrFields: {withCredentials: true},
+			success: function (data) {
+				if (data.status == "success") {
+					alert("密码修改成功,请重新登录");
+					top.location.href="登录.html";
+					$.ajax({
+						type: "GET",
+						url: window.pet+"/admin/exit",
+						dataType: "json",
+						data: {
+							"id": window.localStorage.getItem("aid")
+						},
+						xhrFields: {withCredentials: true},
+						success: function (data) {
+
+						}
+					});
+				}else {
+					alert(data.data.errMsg);
+				}
+			}
+		});
+	}
+</script>
+</html>

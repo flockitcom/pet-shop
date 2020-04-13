@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <title>后台管理</title>
+    <link rel="stylesheet" href="layui/css/layui.css"/>
+    <link rel="stylesheet" href="css/admin.css"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="../my/mypet.js"></script>
+</head>
+<body>
+<div class="container">
+
+    <div class="tar mt10">
+        <button onclick="adminAdd()" class="layui-btn layui-btn-normal layui-btn-small add">+添加商品类型</button>
+    </div>
+
+    <div class="table-list">
+        <table class="layui-table" lay-skin="line">
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>宠物类型</th>
+                <th>商店名称</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="typeTbody">
+
+            </tbody>
+        </table>
+    </div>
+
+    <!--分页-->
+    <div class="paging" id="paging">
+    </div>
+</div>
+<div id="table-pages" style="text-align:center"></div>
+<script type="text/javascript" src="layui/layui.js"></script>
+<script>
+    layui.use(['jquery', 'laydate', 'form', 'layer', 'laypage'], function () {
+        var $$ = layui.jquery,
+            laydate = layui.laydate,
+            layer = layui.layer,
+            laypage = layui.laypage;
+
+        // 分页
+        //  laypage({
+        //     cont: 'table-pages'
+        //     ,pages: 2
+        //     ,skip: true
+        //   });
+
+        // 删除操作
+        $$(document).on("click", ".a4", function () {
+
+        });
+
+        // 添加商品类型
+        // $$(document).on("click", ".add", function () {
+        //     layer.open({
+        //         type: 2
+        //         , area: ['80%', '100%']
+        //         , title: "添加商品类型"
+        //         , content: '添加商品类型.html'
+        //
+        //     });
+        // });
+
+        // 修改用户信息
+        window.editAdmin = function(id) {
+            layer.open({
+                type: 2
+                , area: ['80%', '100%']
+                , title: "添加商品类型"
+                , content: '添加商品类型.html?id='+id
+            });
+        };
+
+        // 添加账户
+        window.adminAdd = function() {
+            layer.open({
+                type: 2
+                , area: ['80%', '100%']
+                , title: "添加商品类型"
+                , content: '添加商品类型.html'
+            });
+        };
+
+        //删除管理员
+        window.deleteAdmin = function(id) {
+            $.ajax({
+                type: "POST",
+                url: window.pet + "/pet/deletePetTypeById",
+                dataType: "json",
+                data: {
+                    "currentId": window.localStorage.getItem("aid"),
+                    "id": id
+                },
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        alert("分类删除成功.");
+                        window.location.reload()
+                    } else {
+                        alert(data.data.errMsg);
+                    }
+                }
+            });
+        };
+
+    });
+
+    $(function () {
+        load(1);
+    });
+
+    window.load = function (pageNo) {
+        $.ajax({
+            type: "POST",
+            url: window.pet + "/pet/getPetTypeByPage",
+            dataType: "json",
+            data: {
+                "pageNo": pageNo
+            },
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                if (data.status == "success") {
+                    var typeTbody = '';
+                    var currentPageSize = data.data.endRow - data.data.startRow + 1;
+                    for (var i = 0; i < currentPageSize; i++) {
+                        var typeTr = '<tr>\n' +
+                            '                <td>'+data.data.list[i].id+'</td>\n' +
+                            '                <td>'+data.data.list[i].name+'</td>\n' +
+                            '                <td>'+data.data.list[i].shopping+'</td>\n' +
+                            '                <td>\n' +
+                            '                    <button onclick="editAdmin('+data.data.list[i].id+')" class="layui-btn layui-btn-warm layui-btn-small add">编辑</button>\n' +
+                            '                    <button onclick="deleteAdmin('+data.data.list[i].id+')" class="layui-btn layui-btn-danger layui-btn-small a4">删除</button>\n' +
+                            '                </td>\n' +
+                            '            </tr>';
+                        typeTbody += typeTr;
+                    }
+                    $("#typeTbody").html(typeTbody);
+                    // form.render();
+
+                    //分页栏
+                    var paging = '';
+                    var paging01 = '<div class="pag-left f-l" style="width: 600px">\n' +
+                        '                        <a onclick="load(' + '1' + ')" href="javascript:void(0)"  class="about left-r f-l"  style="width: 50px">首页</a>\n' +
+                        '                        <p class="about left-r f-l" style="width: 50px;background: white">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n';
+                    paging += paging01;
+                    if (data.data.hasPreviousPage) {
+                        var beforeNum = '<a onclick="load(' + data.data.prePage + ')" href="javascript:void(0)" class="about left-r f-l"><</a>\n';
+                        paging += beforeNum;
+                    }
+
+                    var paging02 = '<ul class="left-m f-l">\n';
+                    paging += paging02;
+
+
+                    var begin;
+                    var end;
+                    if (data.data.pages < 8) {
+                        begin = 1;
+                        end = data.data.pages;
+                    } else {
+                        //1总页面超过8页
+                        begin = data.data.pageNum - 4;
+                        end = data.data.pageNum + 3;
+
+                        // 2前面不够4页
+                        if (begin < 1) {
+                            begin = 1;
+                            end = begin + 7;
+                        }
+
+                        // 3后面不总3页
+                        if (end > data.data.pages) {
+                            end = data.data.pages;
+                            begin = end - 7;
+                        }
+                    }
+
+                    for (var i = begin; i <= end; i++) {
+                        var li;
+                        if (data.data.pageNum == i) {
+                            li = '<li onclick="load(' + i + ')" class="current"><a href="javascript:void(0)">' + i + '</a></li>';
+                        } else {
+                            li = '<li onclick="load(' + i + ')"><a href="javascript:void(0)">' + i + '</a></li>';
+                        }
+                        paging += li;
+                    }
+
+                    var paging03 = '<div style="clear:both;"></div>\n' +
+                        '                        </ul>\n';
+                    paging += paging03;
+                    if (data.data.hasNextPage) {
+                        var nextNum = '<a onclick="load(' + data.data.nextPage + ')" href="javascript:void(0)" class="about left-l f-l">></a>';
+                        paging += nextNum;
+                    }
+                    paging += '                        <p class="about left-r f-l" style="width: 50px;background: white">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n';
+                    var lastNum = '<a onclick="load(' + data.data.pages + ')" href="javascript:void(0)" class="about left-r f-l" style="width: 50px">末页</a>';
+                    paging += lastNum;
+                    var paging04 = '                        <div style="clear:both;"></div>\n' +
+                        '                    </div>\n' +
+                        '                    <div style="clear:both;"></div>';
+                    paging += paging04;
+                    $("#paging").html(paging);
+                    //url跟新
+                    // window.history.pushState("page",null,"管理员账号.html?pageNo="+pageNo);
+                    //定位页面至顶部
+                    window.scrollTo(0, 0);
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>
